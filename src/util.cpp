@@ -3,6 +3,7 @@
 #include <cstdlib>
 #include <cstring>
 #include <string.h>
+#include <unistd.h>
 
 #include <iostream>
 
@@ -49,7 +50,7 @@ void attrs_map_str_parse(std::map<string, string> &map, const char *str)
         value = strsep(&pair, "=");
 
         string str_name(str_trim(name));
-        string str_value(str_trim(str_strip_quotes(value)));    
+        string str_value(str_trim(str_strip_quotes(value)));
 
         // map.insert (std::pair<string, string>(str_name, str_value));
         map[str_name] = str_value;
@@ -101,28 +102,36 @@ char *str_strip_quotes(char *str)
     return str;
 }
 
-string convert_method(int m){
-    switch(m){
-            return "DELETE";
-            case 1:
-            return "GET";
-            case 2:
-            return "HEAD";
-            case 3:
-            return "POST";
-            case 4:
-            return "PUT";
-            case 5:
-            return "CONNECT";
-            case 6:
-            return "OPTIONS";
-            case 7:
-            return "TRACE";
-            case 24:
-            return "PATCH";
-            case 25:
-            return "PURGE";
-            default:
-            return "Undefined";
+string convert_method(int m)
+{
+    switch (m)
+    {
+        return "DELETE";
+    case 1:
+        return "GET";
+    case 2:
+        return "HEAD";
+    case 3:
+        return "POST";
+    case 4:
+        return "PUT";
+    case 5:
+        return "CONNECT";
+    case 6:
+        return "OPTIONS";
+    case 7:
+        return "TRACE";
+    case 24:
+        return "PATCH";
+    case 25:
+        return "PURGE";
+    default:
+        return "Undefined";
     }
+}
+
+void send_to_socket(int sock,const char *msg, int len_msg)
+{
+    int nmsg = write(sock, msg, len_msg);
+    if (nmsg < 0) error("ERROR writing to socket");
 }

@@ -18,13 +18,13 @@ Request::~Request()
     }
 }
 
-map<string, string> Request::get_headers_map()
+map<string, string> Request::get_headers_map() const
 {
     return map_headers;
 }
 
 
-map<string, string> Request::get_params_map()
+map<string, string> Request::get_params_map() const
 {
     return map_params;
 }
@@ -37,7 +37,7 @@ void Request::set_params_map(const map<string, string> &rhs)
 {
 	map_params = rhs;
 }
-string Request::get_url()
+string Request::get_url() const
 {
 	return url;
 }
@@ -45,7 +45,7 @@ void Request::set_url(const string &rhs)
 {
 	url = rhs;
 }
-char* Request::get_data()
+char* Request::get_data() const
 {
 	return data;
 }
@@ -56,7 +56,8 @@ void Request::set_data(const char *rhs, const int lenght)
 	memcpy(data, rhs, len_data);
 }
 
-string Request::get_method(){
+string Request::get_method() const
+{
 	return method;
 }
 

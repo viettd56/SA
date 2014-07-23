@@ -1,9 +1,9 @@
 #include "request_parser.hpp"
 #include "http_parser.h"
-#include "multipart_parser.h"
 #include "util.hpp"
 #include <iostream>
 #include <cstring>
+#include <cstdlib>
 
 using std::cout;
 
@@ -76,7 +76,7 @@ int body_cb(http_parser *p, const char *buf, size_t len)
 int headers_complete_cb(http_parser *p)
 {
     data_size = atoi(headers_map_parsed["Content-Length"].c_str());
-    data = new char[data_size + 1]();
+    data = new char[data_size]();
     return 0;
 }
 
@@ -102,9 +102,6 @@ void request_parser_init()
     last_header_value = "";
     url = "";
     is_complete = false;
-    if (data != NULL){
-        delete[] data;
-    }
     data_len = 0;
     data_size = 0;
 

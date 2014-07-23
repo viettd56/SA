@@ -10,17 +10,17 @@ using std::string;
 class Request
 {
 public:
-	Request();
-	~Request();
-    map<string, string> get_headers_map();
+    Request();
+    ~Request();
+    map<string, string> get_headers_map() const;
     void set_headers_map(const map<string, string> &rhs);
-    map<string, string> get_params_map();
+    map<string, string> get_params_map() const;
     void set_params_map(const map<string, string> &rhs);
-    string get_url();
+    string get_url() const;
     void set_url(const string &rhs);
-    char *get_data();
+    char *get_data() const;
     void set_data(const char *rhs, const int lenght);
-    string get_method();
+    string get_method() const;
     void set_method(const string &rhs);
 private:
     map<string, string> map_headers;
