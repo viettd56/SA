@@ -12,12 +12,30 @@
  *  Lesser General Public License for more details.
  */
 
-#ifndef UTILS_H
-#define UTILS_H
+#ifndef COMPAT_H
+#define COMPAT_H
 
-char *utils_strsep(char **stringp, const char *delim);
-int utils_read_file(char **dst, const char *pemstr);
-int utils_hwaddr_raop(char *str, int strlen, const char *hwaddr, int hwaddrlen);
-int utils_hwaddr_airplay(char *str, int strlen, const char *hwaddr, int hwaddrlen);
+#if defined(WIN32)
+#include <ws2tcpip.h>
+#include <windows.h>
+#ifndef snprintf
+#define snprintf _snprintf
+#endif
+#else
+#include <sys/types.h>
+#include <sys/socket.h>
+#include <sys/ioctl.h>
+#include <sys/time.h>
+#include <netinet/in.h>
+#include <arpa/inet.h>
+#include <unistd.h>
+#include <errno.h>
+#include <netdb.h>
+#include <pthread.h>
+#endif
+
+#include "memalign.h"
+//#include "sockets.h"
+//#include "threads.h"
 
 #endif
