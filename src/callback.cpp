@@ -121,6 +121,7 @@ void put_photo(const Request &rq, http_response_t *res)
 void put_slideshow_session(const Request &rq, http_response_t *res)
 {
 
+    params_map.clear();
     //std::cout << "DATA:" << rq.get_data() << "\n";
     pugi::xml_document doc;
 
@@ -204,7 +205,17 @@ void get_server_info(http_response_t *res)
 }
 void post_play(const Request &rq, http_response_t *res)
 {
-
+    if (rq.get_headers_map()["Content-Type"] == "text/parameters")
+    {
+        cout << rq.get_data() << "\n";
+        params_map.clear();
+        msgs_map_str_parse(params_map, rq.get_data());
+        cout << params_map["Start-Position"] << "\n";
+    }
+    else if (rq.get_headers_map()["Content-Type"] == "application/x-apple-binary-plist"){
+        
+    }
+    http_response_finish(res, NULL, 0);
 }
 void post_scrub(http_response_t *res)
 {

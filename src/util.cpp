@@ -58,6 +58,29 @@ void attrs_map_str_parse(std::map<string, string> &map, const char *str)
     free(original_ptr);
 }
 
+void msgs_map_str_parse(std::map<string, string> &map, const char *str)
+{
+    char *pair, *name, *value, *header_str, *original_ptr;
+    header_str = strdup(str);
+    original_ptr = header_str;
+
+    while (isspace(*header_str)) header_str++;
+
+    while ((pair = strsep(&header_str, "\n")) && pair != NULL)
+    {
+        name = strsep(&pair, ":");
+        value = strsep(&pair, ":");
+
+        string str_name(str_trim(name));
+        string str_value(str_trim(str_strip_quotes(value)));
+
+        // map.insert (std::pair<string, string>(str_name, str_value));
+        map[str_name] = str_value;
+    }
+
+    free(original_ptr);
+}
+
 char *str_trim(char *str)
 {
     char *end;
@@ -137,12 +160,10 @@ void send_to_socket(int sock,const char *msg, int len_msg)
 
 void safe_copy(char *&des, const char *src, const int &len_src, int &size_des, int &len_des){
     if (len_des + len_src < size_des){
-        std::cout << "1111111111111" << "\n";
         memcpy(des + len_des, src, len_src);
         len_des += len_src;
     }
     else {
-        std::cout << "++++++++++++++++" << "\n";
         size_des = (len_des + len_src)*2;
         char *temp = new char[size_des]();
         memcpy(temp, des, len_des);
