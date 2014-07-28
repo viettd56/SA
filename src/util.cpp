@@ -4,7 +4,6 @@
 #include <cstring>
 #include <string.h>
 #include <unistd.h>
-
 #include <iostream>
 
 void error(const char *msg)
@@ -134,4 +133,24 @@ void send_to_socket(int sock,const char *msg, int len_msg)
 {
     int nmsg = write(sock, msg, len_msg);
     if (nmsg < 0) error("ERROR writing to socket");
+}
+
+void safe_copy(char *&des, const char *src, const int &len_src, int &size_des, int &len_des){
+    if (len_des + len_src < size_des){
+        std::cout << "1111111111111" << "\n";
+        memcpy(des + len_des, src, len_src);
+        len_des += len_src;
+    }
+    else {
+        std::cout << "++++++++++++++++" << "\n";
+        size_des = (len_des + len_src)*2;
+        char *temp = new char[size_des]();
+        memcpy(temp, des, len_des);
+        memcpy(temp + len_des, src, len_src);
+        
+        delete[] des;
+        des = temp;
+        std::cout << "temp: " << des << "\n";
+        len_des += len_src;
+    }
 }

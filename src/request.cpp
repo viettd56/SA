@@ -31,36 +31,46 @@ map<string, string> Request::get_params_map() const
 
 void Request::set_headers_map(const map<string, string> &rhs)
 {
-	map_headers = rhs;
+    map_headers = rhs;
 }
 void Request::set_params_map(const map<string, string> &rhs)
 {
-	map_params = rhs;
+    map_params = rhs;
 }
 string Request::get_url() const
 {
-	return url;
+    return url;
 }
 void Request::set_url(const string &rhs)
 {
-	url = rhs;
+    url = rhs;
 }
-char* Request::get_data() const
+char *Request::get_data() const
 {
-	return data;
+    return data;
 }
 void Request::set_data(const char *rhs, const int lenght)
 {
-	len_data = lenght;
-	data = new char[len_data]();
-	memcpy(data, rhs, len_data);
+    len_data = lenght;
+    data = new char[len_data]();
+    memcpy(data, rhs, len_data);
 }
 
 string Request::get_method() const
 {
-	return method;
+    return method;
 }
 
-void Request::set_method(const string &rhs){
-	method = rhs;
+void Request::set_method(const string &rhs)
+{
+    method = rhs;
+}
+
+int Request::get_len_data() const
+{
+    return len_data;
+}
+void Request::set_len_data(const int &rhs)
+{
+    len_data = rhs;
 }

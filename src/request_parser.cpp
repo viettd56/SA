@@ -66,17 +66,24 @@ int header_value_cb(http_parser *p, const char *buf, size_t len)
 
 int body_cb(http_parser *p, const char *buf, size_t len)
 {
-    if (data_len < data_size){
-        memcpy(data+data_len, buf, len);
+    if (data_len + len <= data_size)
+    {
+        memcpy(data + data_len, buf, len);
         data_len += len;
     }
+    // safe_copy(data, buf, len, data_size, data_len);
+    // cout << "size:" << data_size << "\n" << "len:" << data_len << "\n" << len << "\n";
+
+    // cout << "data:" << data << "\n";
     return 0;
 }
 
 int headers_complete_cb(http_parser *p)
 {
     data_size = atoi(headers_map_parsed["Content-Length"].c_str());
+    //cout << "--------------------" << data_size << "------------------------\n";
     data = new char[data_size]();
+    //cout << "-------------------" << (int *)data << "\n";
     return 0;
 }
 
@@ -105,6 +112,12 @@ void request_parser_init()
     data_len = 0;
     data_size = 0;
 
+    if (data != NULL)
+    {
+        delete[] data;
+        data = NULL;
+    }
+
     headers_map_parsed.clear();
     params_map_parsed.clear();
 }
@@ -123,8 +136,12 @@ int request_parser_excute(http_parser *parser, Request &rq, char *buf, char n)
         rq.set_url(url);
         rq.set_method(convert_method(parser->method));
         rq.set_data(data, data_len);
-        if (data != NULL){
+        //cout << data;
+        rq.set_len_data(data_len);
+        if (data != NULL)
+        {
             delete[] data;
+            data = NULL;
         }
         return 0;
     }
@@ -140,6 +157,7 @@ map<string, string> get_params_map()
     return params_map_parsed;
 }
 
-string get_url(){
+string get_url()
+{
     return url;
 }

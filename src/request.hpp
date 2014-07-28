@@ -22,6 +22,8 @@ public:
     void set_data(const char *rhs, const int lenght);
     string get_method() const;
     void set_method(const string &rhs);
+    int get_len_data() const;
+    void set_len_data(const int &rhs);
 private:
     map<string, string> map_headers;
     map<string, string> map_params;
