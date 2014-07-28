@@ -70,12 +70,12 @@ void callback_excute(const int &sock, const Request &rq)
         else if (str_starts_with(url.c_str(), "/scrub"))
         {
             cout << "POST /scrub\n";
-            post_scrub(res);
+            post_scrub(url.c_str() + strlen("/scrub?"), res);
         }
         else if (str_starts_with(url.c_str(), "/rate"))
         {
             cout << "POST /rate\n";
-            post_rate(res);
+            post_rate(url.c_str() + strlen("/rate?"), res);
         }
         else if (str_starts_with(url.c_str(), "/getProperty"))
         {
@@ -212,18 +212,27 @@ void post_play(const Request &rq, http_response_t *res)
         msgs_map_str_parse(params_map, rq.get_data());
         cout << params_map["Start-Position"] << "\n";
     }
-    else if (rq.get_headers_map()["Content-Type"] == "application/x-apple-binary-plist"){
-        
+    else if (rq.get_headers_map()["Content-Type"] == "application/x-apple-binary-plist")
+    {
+
     }
     http_response_finish(res, NULL, 0);
 }
-void post_scrub(http_response_t *res)
+void post_scrub(const char *data, http_response_t *res)
 {
-
+    params_map.clear();
+    //cout << data << "\n";
+    attrs_map_str_parse(params_map, data);
+    cout << params_map["position"] << "\n";
+    http_response_finish(res, NULL, 0);
 }
-void post_rate(http_response_t *res)
+void post_rate(const char *data, http_response_t *res)
 {
-
+    params_map.clear();
+    //cout << data << "\n";
+    attrs_map_str_parse(params_map, data);
+    cout << params_map["value"] << "\n";
+    http_response_finish(res, NULL, 0);
 }
 void post_stop(http_response_t *res)
 {
