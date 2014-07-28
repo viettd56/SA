@@ -15,6 +15,7 @@ char *str_strip_quotes(char *str);
 string convert_method(int m);
 void send_to_socket(int sock,const char *msg, int len_msg);
 void safe_copy(char *&des, const char *src, const int &len_src, int &size_des, int &len_des);
+string doubletostr(const double &t);
 
 
 #endif

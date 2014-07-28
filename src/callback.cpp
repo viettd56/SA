@@ -169,6 +169,7 @@ void put_slideshow_session(const Request &rq, http_response_t *res)
                 }
             }
         }
+        http_response_add_header(res, "Content-Type", "text/x-apple-plist+xml");
         // cout << params_map["theme"] << "\n";
         string msg_reponse = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>";
         msg_reponse = msg_reponse + "\n"
@@ -240,6 +241,15 @@ void post_stop(http_response_t *res)
 }
 void get_scrub(http_response_t *res)
 {
+    http_response_add_header(res, "Content-Type", "text/parameters");
+    string duration = doubletostr(83.124794);
+    string position = doubletostr(14.467000);
+
+    string msg_reponse = "";
+    msg_reponse = msg_reponse + "duration: " + duration + "\nposition: " + position;
+    cout << msg_reponse << "\n";
+    const char *msg = msg_reponse.c_str();
+    http_response_finish(res, msg, strlen(msg));
 
 }
 void get_playback_info(http_response_t *res)
