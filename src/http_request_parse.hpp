@@ -8,14 +8,14 @@
 using std::string;
 using std::cout;
 
-class Http_request
+class Http_request_parse
 {
 public:
 	//sk: socket from client
-    Http_request(int sk);
-    ~Http_request();
+    Http_request_parse(int sk);
+    ~Http_request_parse();
     // Receive request from client and excute
-    void http_request_excute();
+    void http_request_parse_excute();
   private:
     int sock;
     std::map<string, string> headers_map;

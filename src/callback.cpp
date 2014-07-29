@@ -108,6 +108,15 @@ void callback_excute(const int &sock, const Request &rq)
 
     send_to_socket(sock, data_res, datalen);
     http_response_destroy(res);
+
+    //------------------------------------------------
+
+    // http_request_t *req = post_event_slideshow();
+    // int datalen;
+    // const char *data_res = http_request_get_data(req, &datalen);
+
+    // send_to_socket(sock, data_res, datalen);
+    // http_request_destroy(req);
 }
 
 void get_slideshow_features(http_response_t *res)
@@ -242,9 +251,33 @@ void post_stop_photo_slideshow(const Request &rq, http_response_t *res)
 {
 
 }
-void post_event(const Request &rq, http_response_t *res)
+http_request_t *post_event_photo()
 {
+    string x_apple_session_ID = "1bd6ceeb-fffd-456c-a09c-996053a7a08c";
+    string category = "photo";
+    string sessionID = "38";
+    string state = "stopped";
 
+    http_request_t *req = http_request_init("HTTP/1.1", "POST", "/event");
+    http_request_add_header(req, "Content-Type", "text/x-apple-plist+xml");
+    http_request_add_header(req, "X-Apple-Session-ID", x_apple_session_ID.c_str());
+    string msg_request = "";
+    msg_request = msg_request + "<?xml version=\"1.0\" encoding=\"UTF-8\"?>" + "\n"
+                  + "<!DOCTYPE plist PUBLIC \"-//Apple//DTD PLIST 1.0//EN\"" + "\n"
+                  + "\"http://www.apple.com/DTDs/PropertyList-1.0.dtd\">" + "\n"
+                  + "<plist version=\"1.0\">" + "\n"
+                  + "<dict>" + "\n"
+                  + "<key>category</key>" + "\n"
+                  + "<string>" + category + "</string>" + "\n"
+                  + "<key>sessionID</key>" + "\n"
+                  + "<integer>" + sessionID + "</integer>" + "\n"
+                  + "<key>state</key>" + "\n"
+                  + "<string>" + state + "</string>" + "\n"
+                  + "</dict>" + "\n"
+                  + "</plist>" + "\n";
+    const char *msg = msg_request.c_str();
+    http_request_finish(req, msg, strlen(msg));
+    return req;
 }
 void get_slideshow(const Request &rq, http_response_t *res)
 {
@@ -565,9 +598,36 @@ void notify_event(const Request &rq, http_response_t *res)
 {
 
 }
-void notify_slideshow(http_response_t *res)
+http_request_t *post_event_slideshow()
 {
+    string x_apple_session_ID = "f1634b51-5cae-4384-ade5-54f4159a15f1";
+    string category = "slideshow";
+    string lastAssetID = "5";
+    string sessionID = "4";
+    string state = "playing";
 
+    http_request_t *req = http_request_init("HTTP/1.1", "POST", "/event");
+    http_request_add_header(req, "Content-Type", "text/x-apple-plist+xml");
+    http_request_add_header(req, "X-Apple-Session-ID", x_apple_session_ID.c_str());
+    string msg_request = "";
+    msg_request = msg_request + "<?xml version=\"1.0\" encoding=\"UTF-8\"?>" + "\n"
+                  + "<!DOCTYPE plist PUBLIC \"-//Apple//DTD PLIST 1.0//EN\"" + "\n"
+                  + "\"http://www.apple.com/DTDs/PropertyList-1.0.dtd\">" + "\n"
+                  + "<plist version=\"1.0\">" + "\n"
+                  + "<dict>" + "\n"
+                  + "<key>category</key>" + "\n"
+                  + "<string>" + category + "</string>" + "\n"
+                  + "<key>lastAssetID</key>" + "\n"
+                  + "<integer>" + lastAssetID + "</integer>" + "\n"
+                  + "<key>sessionID</key>" + "\n"
+                  + "<integer>" + sessionID + "</integer>" + "\n"
+                  + "<key>state</key>" + "\n"
+                  + "<string>" + state + "</string>" + "\n"
+                  + "</dict>" + "\n"
+                  + "</plist>" + "\n";
+    const char *msg = msg_request.c_str();
+    http_request_finish(req, msg, strlen(msg));
+    return req;
 }
 void stop_photo_session(const Request &rq, http_response_t *res)
 {

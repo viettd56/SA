@@ -8,7 +8,7 @@
 #include <netinet/in.h>
 #include "net.hpp"
 #include "util.hpp"
-#include "http_request.hpp"
+#include "http_request_parse.hpp"
 
 int main(int argc, char *argv[])
 {
@@ -30,8 +30,8 @@ int main(int argc, char *argv[])
     if (newsockfd < 0)
         error("ERROR on accept");
 
-    Http_request request(newsockfd);
-    request.http_request_excute();
+    Http_request_parse request(newsockfd);
+    request.http_request_parse_excute();
     
     close(newsockfd);
     close(sockfd);

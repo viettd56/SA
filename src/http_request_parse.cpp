@@ -1,6 +1,6 @@
 #include <iostream>
 #include <unistd.h>
-#include "http_request.hpp"
+#include "http_request_parse.hpp"
 #include "util.hpp"
 #include "request_parser.hpp"
 #include "http_response.h"
@@ -11,17 +11,17 @@ char buffer[BUFFER_SIZE];
 
 using std::cout;
 
-Http_request::Http_request(int sk): sock(sk)
+Http_request_parse::Http_request_parse(int sk): sock(sk)
 {
 
 }
 
-Http_request::~Http_request()
+Http_request_parse::~Http_request_parse()
 {
 
 }
 
-void Http_request::http_request_excute()
+void Http_request_parse::http_request_parse_excute()
 {
     while (1)
     {
