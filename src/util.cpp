@@ -187,3 +187,21 @@ string doubletostr(const double &t)
     os << t;
     return os.str();
 }
+
+char *str_concat(const char *str1, const char *str2) {
+  if (str1 == NULL) {
+    return strdup(str2);
+  }
+
+  if (str2 == NULL) {
+    return strdup(str1);
+  }
+
+  int len1 = strlen(str1), len2 = strlen(str2);
+  char *result = new char[strlen(str1) + strlen(str2) + 1]();
+
+  memcpy(result, str1, len1);
+  memcpy(result + len1, str2, len2 + 1);
+
+  return result;
+}
