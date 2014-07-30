@@ -29,27 +29,32 @@ void callback_excute(const int &sock, const Request &rq)
     {
         if (!url.compare("/slideshow-features"))
         {
+            //A client can fetch the list of available transitions for slideshows.
             cout << "GET /slideshow-features\n";
             get_slideshow_features(res);
         }
         else if (!url.compare("/server-info"))
         {
+            // Fetch general informations about the AirPlay server.
             cout << "GET  /server-info\n";
             get_server_info(res);
 
         }
         else if (!url.compare("/scrub"))
         {
+            //Retrieve the current playback position.
             cout << "GET /scrub\n";
             get_scrub(res);
         }
         else if (!url.compare("/playback-info"))
         {
+            //Retrieve playback informations such as position, duration, rate, buffering status and more.
             cout << "GET /playback-info\n";
             get_playback_info(res);
         }
         else if (str_starts_with(url.c_str(), "/getProperty"))
         {
+            //Get playback property.
             cout << "GET /getProperty\n";
             get_getProperty(url.c_str() + strlen("/getProperty?"), res);
         }
@@ -59,26 +64,30 @@ void callback_excute(const int &sock, const Request &rq)
     {
         if (!url.compare("/stop"))
         {
+            //Stop a photo or slideshow session.
             cout << "POST /stop\n";
             post_stop(res);
         }
         else if (!url.compare("/reverse"))
         {
             cout << "POST /reverse\n";
-            post_reverse(res);
+            post_reverse(rq, res);
         }
         else if (!url.compare("/play"))
         {
+            //Start video playback.
             cout << "POST /play\n";
             post_play(rq, res);
         }
         else if (str_starts_with(url.c_str(), "/scrub"))
         {
+            //Seek at an arbitrary location in the video.
             cout << "POST /scrub\n";
             post_scrub(url.c_str() + strlen("/scrub?"), res);
         }
         else if (str_starts_with(url.c_str(), "/rate"))
         {
+            //Change the playback rate.
             cout << "POST /rate\n";
             post_rate(url.c_str() + strlen("/rate?"), res);
         }
@@ -87,16 +96,20 @@ void callback_excute(const int &sock, const Request &rq)
     {
         if (!url.compare("/photo"))
         {
+            //Send a JPEG picture to the server.
             cout << "PUT /photo\n";
             put_photo(rq, res);
         }
         else if (!url.compare("/slideshows/1"))
         {
+
+            //Start or stop a slideshow session.
             cout << "PUT /slideshows/1\n";
             put_slideshow_session(rq, res);
         }
         else if (str_starts_with(url.c_str(), "/setProperty"))
         {
+            //Set playback property.
             cout << "PUT /setProperty\n";
             put_setProperty(url.c_str() + strlen("/setProperty?"), rq, res);
         }
@@ -111,7 +124,7 @@ void callback_excute(const int &sock, const Request &rq)
 
     //------------------------------------------------
 
-    // http_request_t *req = post_event_slideshow();
+    // http_request_t *req = post_event_video();
     // int datalen;
     // const char *data_res = http_request_get_data(req, &datalen);
 
@@ -119,6 +132,7 @@ void callback_excute(const int &sock, const Request &rq)
     // http_request_destroy(req);
 }
 
+//A client can fetch the list of available transitions for slideshows.
 void get_slideshow_features(http_response_t *res)
 {
     http_response_add_header(res, "Content-Type", "text/x-apple-plist+xml");
@@ -145,6 +159,8 @@ void get_slideshow_features(http_response_t *res)
     const char *msg = msg_reponse.c_str();
     http_response_finish(res, msg, strlen(msg));
 }
+
+//Send a JPEG picture to the server.
 void put_photo(const Request &rq, http_response_t *res)
 {
     std::map<string, string> map = rq.get_headers_map();
@@ -175,9 +191,10 @@ void put_photo(const Request &rq, http_response_t *res)
 
     http_response_finish(res, NULL, 0);
 }
+
+//Start or stop a slideshow session.
 void put_slideshow_session(const Request &rq, http_response_t *res)
 {
-
     params_map.clear();
     state_params = KEY;
     //std::cout << "DATA:" << rq.get_data() << "\n";
@@ -251,6 +268,7 @@ void post_stop_photo_slideshow(const Request &rq, http_response_t *res)
 {
 
 }
+//notifies a client that a photo session has ended.
 http_request_t *post_event_photo()
 {
     string x_apple_session_ID = "1bd6ceeb-fffd-456c-a09c-996053a7a08c";
@@ -279,10 +297,25 @@ http_request_t *post_event_photo()
     http_request_finish(req, msg, strlen(msg));
     return req;
 }
-void get_slideshow(const Request &rq, http_response_t *res)
-{
 
+// fetch a new picture
+http_request_t *get_slideshow()
+{
+    string id = "1";
+    string key = "1";
+    string url = "";
+    url += "/slideshows/" + id + "/assets/" + key;
+    string x_apple_session_ID = "1bd6ceeb-fffd-456c-a09c-996053a7a08c";
+
+    http_request_t *req = http_request_init("HTTP/1.1", "GET", url.c_str());
+    http_request_add_header(req, "Accept", "application/x-apple-binary-plist");
+    http_request_add_header(req, "X-Apple-Session-ID", x_apple_session_ID.c_str());
+
+    http_request_finish(req, NULL, 0);
+    return req;
 }
+
+// Fetch general informations about the AirPlay server.
 void get_server_info(http_response_t *res)
 {
     string deviceid = "58:55:CA:1A:E2:88";
@@ -321,11 +354,11 @@ void post_play(const Request &rq, http_response_t *res)
         cout << rq.get_data() << "\n";
         params_map.clear();
         msgs_map_str_parse(params_map, rq.get_data());
+        cout << params_map["Content-Location"] << "\n";
         cout << params_map["Start-Position"] << "\n";
     }
     else if (rq.get_headers_map()["Content-Type"] == "application/x-apple-binary-plist")
     {
-        //video playback from iPhone
         char *data = rq.get_data();
         char *binary_data = strsep(&data, "\r\n\r\n"); // BINARY PLIST DATA
         char *xml = data;
@@ -360,6 +393,8 @@ void post_play(const Request &rq, http_response_t *res)
     }
     http_response_finish(res, NULL, 0);
 }
+
+//Seek at an arbitrary location in the video.
 void post_scrub(const char *argument, http_response_t *res)
 {
     params_map.clear();
@@ -368,6 +403,8 @@ void post_scrub(const char *argument, http_response_t *res)
     cout << params_map["position"] << "\n";
     http_response_finish(res, NULL, 0);
 }
+
+//Change the playback rate.
 void post_rate(const char *argument, http_response_t *res)
 {
     params_map.clear();
@@ -376,10 +413,15 @@ void post_rate(const char *argument, http_response_t *res)
     cout << params_map["value"] << "\n";
     http_response_finish(res, NULL, 0);
 }
+
+//Stop playback.
 void post_stop(http_response_t *res)
 {
+    //Stop a photo or slideshow session.
     http_response_finish(res, NULL, 0);
 }
+
+//Retrieve the current playback position.
 void get_scrub(http_response_t *res)
 {
     http_response_add_header(res, "Content-Type", "text/parameters");
@@ -393,8 +435,11 @@ void get_scrub(http_response_t *res)
     http_response_finish(res, msg, strlen(msg));
 
 }
+
+//Retrieve playback informations such as position, duration, rate, buffering status and more.
 void get_playback_info(http_response_t *res)
 {
+    //get playback access log
     string duration = "1801";
     string loadedTimeRanges_duration = "51.541130402";
     string loadedTimeRanges_start = "18.118717650000001";
@@ -442,7 +487,10 @@ void get_playback_info(http_response_t *res)
                   + "</plist>" + "\n";
     const char *msg = msg_reponse.c_str();
     http_response_finish(res, msg, strlen(msg));
+
 }
+
+//Set playback property.
 void put_setProperty(const char *argument, const Request &rq, http_response_t *res)
 {
     char *data = rq.get_data();
@@ -529,66 +577,70 @@ void put_setProperty(const char *argument, const Request &rq, http_response_t *r
     //delete binary_data_reponse
 }
 
+//Get playback property.
 void get_getProperty(const char *argument, http_response_t *res)
 {
-    string errorCode = "0";
-    string value_bytes = "1818336";
-    string value_c_duration_downloaded = "70";
-    string value_c_duration_watched = "18.154102027416229";
-    string value_c_frames_dropped = "0";
-    string value_c_observed_bitrate = "14598047.302367469";
-    string value_c_overdue = "0";
-    string value_c_stalls = "0";
-    string value_c_start_time = "0.0";
-    string value_c_startup_time = "0.27732497453689575";
-    string value_cs_guid = "B475F105-78FD-4200-96BC-148BAB6DAC11";
-    string value_date = "2012-03-16T15:31:24Z";
-    string value_s_ip = "213.152.6.89";
-    string value_s_ip_changes = "0";
-    string value_sc_count = "7";
-    string value_uri = "http://devimages.apple.com/iphone/samples/bipbop/gear1/prog_index.m3u8";
+
+    string msg_reponse = "\r\n\r\n";
     char *binary_data_reponse = NULL;
 
     if (!strcmp(argument, "playbackAccessLog"))
     {
-        //set forward end time
+        //get playback access log
+        string errorCode = "0";
+        string value_bytes = "1818336";
+        string value_c_duration_downloaded = "70";
+        string value_c_duration_watched = "18.154102027416229";
+        string value_c_frames_dropped = "0";
+        string value_c_observed_bitrate = "14598047.302367469";
+        string value_c_overdue = "0";
+        string value_c_stalls = "0";
+        string value_c_start_time = "0.0";
+        string value_c_startup_time = "0.27732497453689575";
+        string value_cs_guid = "B475F105-78FD-4200-96BC-148BAB6DAC11";
+        string value_date = "2012-03-16T15:31:24Z";
+        string value_s_ip = "213.152.6.89";
+        string value_s_ip_changes = "0";
+        string value_sc_count = "7";
+        string value_uri = "http://devimages.apple.com/iphone/samples/bipbop/gear1/prog_index.m3u8";
+
+        msg_reponse = msg_reponse + "<?xml version=\"1.0\" encoding=\"UTF-8\"?>" + "\n"
+                      + "<!DOCTYPE plist PUBLIC \"-//Apple//DTD PLIST 1.0//EN\"" + "\n"
+                      + "\"http://www.apple.com/DTDs/PropertyList-1.0.dtd\">" + "\n"
+                      + "<plist version=\"1.0\">" + "\n"
+                      + "<dict>" + "\n"
+                      + "<key>errorCode</key>" + "\n"
+                      + "<integer>" + errorCode + "</integer>" + "\n"
+                      + "<key>value</key>" + "\n"
+                      + "<array>" + "\n"
+                      + "<dict>" + "\n"
+                      + "<key>bytes</key> <integer>" + value_bytes + "</integer>" + "\n"
+                      + "<key>c-duration-downloaded</key> <real>" + value_c_duration_downloaded + "</real>" + "\n"
+                      + "<key>c-duration-watched</key> <real>" + value_c_duration_watched + "</real>" + "\n"
+                      + "<key>c-frames-dropped</key> <integer>" + value_c_frames_dropped + "</integer>" + "\n"
+                      + "<key>c-observed-bitrate</key> <real>" + value_c_observed_bitrate + "</real>" + "\n"
+                      + "<key>c-overdue</key> <integer>" + value_c_overdue + "</integer>" + "\n"
+                      + "<key>c-stalls</key> <integer>" + value_c_stalls + "</integer>" + "\n"
+                      + "<key>c-start-time</key> <real>" + value_c_start_time + "</real>" + "\n"
+                      + "<key>c-startup-time</key> <real>" + value_c_startup_time + "</real>" + "\n"
+                      + "<key>cs-guid</key> <string>" + value_cs_guid + "</string>" + "\n"
+                      + "<key>date</key> <date>" + value_date + "</date>" + "\n"
+                      + "<key>s-ip</key> <string>" + value_s_ip + "</string>" + "\n"
+                      + "<key>s-ip-changes</key> <integer>" + value_s_ip_changes + "</integer>" + "\n"
+                      + "<key>sc-count</key> <integer>" + value_sc_count + "</integer>" + "\n"
+                      + "<key>uri</key> <string>" + value_uri + "</string>" + "\n"
+                      + "</dict>" + "\n"
+                      + "</array>" + "\n"
+                      + "</dict>" + "\n"
+                      + "</plist>" + "\n";
     }
     else if (!strcmp(argument, "playbackErrorLog"))
     {
-        //set reverse end time
+        //get playback error log
     }
 
     http_response_add_header(res, "Content-Type", "application/x-apple-binary-plist");
-    string msg_reponse = "\r\n";
-    msg_reponse = msg_reponse + "<?xml version=\"1.0\" encoding=\"UTF-8\"?>" + "\n"
-                  + "<!DOCTYPE plist PUBLIC \"-//Apple//DTD PLIST 1.0//EN\"" + "\n"
-                  + "\"http://www.apple.com/DTDs/PropertyList-1.0.dtd\">" + "\n"
-                  + "<plist version=\"1.0\">" + "\n"
-                  + "<dict>" + "\n"
-                  + "<key>errorCode</key>" + "\n"
-                  + "<integer>" + errorCode + "</integer>" + "\n"
-                  + "<key>value</key>" + "\n"
-                  + "<array>" + "\n"
-                  + "<dict>" + "\n"
-                  + "<key>bytes</key> <integer>" + value_bytes + "</integer>" + "\n"
-                  + "<key>c-duration-downloaded</key> <real>" + value_c_duration_downloaded + "</real>" + "\n"
-                  + "<key>c-duration-watched</key> <real>" + value_c_duration_watched + "</real>" + "\n"
-                  + "<key>c-frames-dropped</key> <integer>" + value_c_frames_dropped + "</integer>" + "\n"
-                  + "<key>c-observed-bitrate</key> <real>" + value_c_observed_bitrate + "</real>" + "\n"
-                  + "<key>c-overdue</key> <integer>" + value_c_overdue + "</integer>" + "\n"
-                  + "<key>c-stalls</key> <integer>" + value_c_stalls + "</integer>" + "\n"
-                  + "<key>c-start-time</key> <real>" + value_c_start_time + "</real>" + "\n"
-                  + "<key>c-startup-time</key> <real>" + value_c_startup_time + "</real>" + "\n"
-                  + "<key>cs-guid</key> <string>" + value_cs_guid + "</string>" + "\n"
-                  + "<key>date</key> <date>" + value_date + "</date>" + "\n"
-                  + "<key>s-ip</key> <string>" + value_s_ip + "</string>" + "\n"
-                  + "<key>s-ip-changes</key> <integer>" + value_s_ip_changes + "</integer>" + "\n"
-                  + "<key>sc-count</key> <integer>" + value_sc_count + "</integer>" + "\n"
-                  + "<key>uri</key> <string>" + value_uri + "</string>" + "\n"
-                  + "</dict>" + "\n"
-                  + "</array>" + "\n"
-                  + "</dict>" + "\n"
-                  + "</plist>" + "\n";
+
     const char *msg = str_concat(binary_data_reponse, msg_reponse.c_str());
     http_response_finish(res, msg, strlen(msg));
     delete[] msg;
@@ -598,6 +650,8 @@ void notify_event(const Request &rq, http_response_t *res)
 {
 
 }
+
+// notify the server about the playback state.
 http_request_t *post_event_slideshow()
 {
     string x_apple_session_ID = "f1634b51-5cae-4384-ade5-54f4159a15f1";
@@ -629,12 +683,47 @@ http_request_t *post_event_slideshow()
     http_request_finish(req, msg, strlen(msg));
     return req;
 }
-void stop_photo_session(const Request &rq, http_response_t *res)
-{
 
+//send the playback state to the client.
+http_request_t *post_event_video()
+{
+    string x_apple_session_ID = "f1634b51-5cae-4384-ade5-54f4159a15f1";
+    string category = "video";
+    string sessionID = "13";
+    string state = "paused";
+
+    http_request_t *req = http_request_init("HTTP/1.1", "POST", "/event");
+    http_request_add_header(req, "Content-Type", "application/x-apple-plist");
+    http_request_add_header(req, "X-Apple-Session-ID", x_apple_session_ID.c_str());
+    string msg_request = "";
+    msg_request = msg_request + "<?xml version=\"1.0\" encoding=\"UTF-8\"?>" + "\n"
+                  + "<!DOCTYPE plist PUBLIC \"-//Apple//DTD PLIST 1.0//EN\"" + "\n"
+                  + "\"http://www.apple.com/DTDs/PropertyList-1.0.dtd\">" + "\n"
+                  + "<plist version=\"1.0\">" + "\n"
+                  + "<dict>" + "\n"
+                  + "<key>category</key>" + "\n"
+                  + "<string>" + category + "</string>" + "\n"
+                  + "<key>sessionID</key>" + "\n"
+                  + "<integer>" + sessionID + "</integer>" + "\n"
+                  + "<key>state</key>" + "\n"
+                  + "<string>" + state + "</string>" + "\n"
+                  + "</dict>" + "\n"
+                  + "</plist>" + "\n";
+    const char *msg = msg_request.c_str();
+    http_request_finish(req, msg, strlen(msg));
+    return req;
 }
 
-void post_reverse(http_response_t *res)
+void post_reverse(const Request &rq, http_response_t *res)
 {
+    std::map<string, string> map = rq.get_headers_map();
+    string x_apple_session_ID = map["X-Apple-Session-ID"];
+    string x_apple_device_ID = map["X-Apple-Device-ID"];
+    string x_apple_purpose = map["X-Apple-Purpose"];
 
+    http_response_destroy(res);
+    res = http_response_init("HTTP/1.1", 101, "Switching Protocols");
+    http_response_add_header(res, "Upgrade", "PTTH/1.0");
+    http_response_add_header(res, "Connection", "Upgrade");
+    http_response_finish(res, NULL, 0);
 }
