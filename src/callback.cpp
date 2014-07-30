@@ -2,6 +2,7 @@
 #include <iostream>
 #include "util.hpp"
 #include "pugixml.hpp"
+#include <unistd.h>
 #include <cstring>
 #include <map>
 #include <string>
@@ -13,6 +14,9 @@ enum state_param {KEY, VALUE};
 state_param state_params = KEY;
 string last_key = "";
 
+void send_error_method_not_allowed(http_response_t *res);
+void send_error_not_found(http_response_t *res);
+
 void callback_excute(const int &sock, const Request &rq)
 {
     http_response_t *res = NULL;
@@ -20,7 +24,7 @@ void callback_excute(const int &sock, const Request &rq)
     // params_map = get_params_map();
     string method = rq.get_method();
     string url = rq.get_url();
-    // cout << method << "\n" << url << "\n";
+    cout << "method: " << method << "\n" << url << "\n";
     // char *data = rq.get_data();
 
     res = http_response_init("HTTP/1.1", 200, "OK");
@@ -58,7 +62,10 @@ void callback_excute(const int &sock, const Request &rq)
             cout << "GET /getProperty\n";
             get_getProperty(url.c_str() + strlen("/getProperty?"), res);
         }
-
+        else
+        {
+            send_error_not_found(res);
+        }
     }
     else if (!method.compare("POST"))
     {
@@ -91,6 +98,10 @@ void callback_excute(const int &sock, const Request &rq)
             cout << "POST /rate\n";
             post_rate(url.c_str() + strlen("/rate?"), res);
         }
+        else
+        {
+            send_error_not_found(res);
+        }
     }
     else if (!method.compare("PUT"))
     {
@@ -113,6 +124,14 @@ void callback_excute(const int &sock, const Request &rq)
             cout << "PUT /setProperty\n";
             put_setProperty(url.c_str() + strlen("/setProperty?"), rq, res);
         }
+        else
+        {
+            send_error_not_found(res);
+        }
+    }
+    else
+    {
+        send_error_method_not_allowed(res);
     }
 
     int datalen;
@@ -725,5 +744,19 @@ void post_reverse(const Request &rq, http_response_t *res)
     res = http_response_init("HTTP/1.1", 101, "Switching Protocols");
     http_response_add_header(res, "Upgrade", "PTTH/1.0");
     http_response_add_header(res, "Connection", "Upgrade");
+    http_response_finish(res, NULL, 0);
+}
+
+void send_error_method_not_allowed(http_response_t *res)
+{
+    http_response_destroy(res);
+    res = http_response_init("HTTP/1.1", 405, "Method Not Allowed");
+    http_response_finish(res, NULL, 0);
+}
+
+void send_error_not_found(http_response_t *res)
+{
+    http_response_destroy(res);
+    res = http_response_init("HTTP/1.1", 404, "Not Found");
     http_response_finish(res, NULL, 0);
 }

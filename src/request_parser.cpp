@@ -60,6 +60,7 @@ int header_value_cb(http_parser *p, const char *buf, size_t len)
         headers_map_parsed.erase(last_header_field);
     }
     headers_map_parsed.insert (std::pair<string, string>(last_header_field, last_header_value));
+    //cout << "F:" << last_header_field << "\n" << "V:" << last_header_value << "\n";
     last_state = VALUE;
     return 0;
 }
@@ -74,7 +75,7 @@ int body_cb(http_parser *p, const char *buf, size_t len)
     // safe_copy(data, buf, len, data_size, data_len);
     // cout << "size:" << data_size << "\n" << "len:" << data_len << "\n" << len << "\n";
 
-    // cout << "data:" << data << "\n";
+    //cout << "data:" << data << "\n";
     return 0;
 }
 
