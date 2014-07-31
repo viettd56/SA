@@ -67,14 +67,15 @@ void msgs_map_str_parse(std::map<string, string> &map, const char *str)
 
     while (isspace(*header_str)) header_str++;
 
-    while ((pair = strsep(&header_str, "\n")) && pair != NULL)
+    while ((pair = strsep(&header_str, "\n")) && pair != NULL && strcmp(pair, ""))
     {
+        //std::cout << "pair: " << pair << "\n";
         name = strsep(&pair, ":");
-        value = strsep(&pair, ":");
+        value = pair;
 
         string str_name(str_trim(name));
-        string str_value(str_trim(str_strip_quotes(value)));
-
+        string str_value(str_trim(value));
+        //std::cout << "N: " << str_name << "\n" << "V: " << str_value << "\n";
         // map.insert (std::pair<string, string>(str_name, str_value));
         map[str_name] = str_value;
     }
@@ -182,7 +183,7 @@ void safe_copy(char *&des, const char *src, const int &len_src, int &size_des, i
 
 string doubletostr(const double &t)
 {
-    std::cout << t << "\n";
+    //std::cout << t << "\n";
     std::ostringstream os;
     os << t;
     return os.str();

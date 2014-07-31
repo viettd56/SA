@@ -2,7 +2,6 @@
 #include <iostream>
 #include "util.hpp"
 #include "pugixml.hpp"
-#include <unistd.h>
 #include <cstring>
 #include <map>
 #include <string>
@@ -24,7 +23,7 @@ void callback_excute(const int &sock, const Request &rq)
     // params_map = get_params_map();
     string method = rq.get_method();
     string url = rq.get_url();
-    cout << "method: " << method << "\n" << url << "\n";
+    // cout << "method: " << method << "\n" << url << "\n";
     // char *data = rq.get_data();
 
     res = http_response_init("HTTP/1.1", 200, "OK");
@@ -195,6 +194,7 @@ void put_photo(const Request &rq, http_response_t *res)
     {
         //if show a picture without any transition
         cout << "Show a picture without any transition" << "\n";
+        cout << rq.get_data() << "\n";
     }
 
     if (x_apple_assetAction == "cacheOnly")
@@ -368,16 +368,20 @@ void get_server_info(http_response_t *res)
 }
 void post_play(const Request &rq, http_response_t *res)
 {
-    if (rq.get_headers_map()["Content-Type"] == "text/parameters")
+    //cout << "Content-Type" << rq.get_headers_map()["Content-Type"] << "\n";
+    if (rq.get_headers_map()["Content-Type"] == "text/parameters"
+            || rq.get_headers_map()["Content-Type"] == "")
     {
-        cout << rq.get_data() << "\n";
+        //cout << "text/parameters" << "\n";
+        //cout << "data:" << rq.get_data() << "\n";
         params_map.clear();
         msgs_map_str_parse(params_map, rq.get_data());
-        cout << params_map["Content-Location"] << "\n";
-        cout << params_map["Start-Position"] << "\n";
+        cout << "Content-Location: " << params_map["Content-Location"] << "\n";
+        cout << "Start-Position: " << params_map["Start-Position"] << "\n";
     }
     else if (rq.get_headers_map()["Content-Type"] == "application/x-apple-binary-plist")
     {
+        //cout << "application/x-apple-binary-plist" << "\n";
         char *data = rq.get_data();
         char *binary_data = strsep(&data, "\r\n\r\n"); // BINARY PLIST DATA
         char *xml = data;
@@ -444,8 +448,9 @@ void post_stop(http_response_t *res)
 void get_scrub(http_response_t *res)
 {
     http_response_add_header(res, "Content-Type", "text/parameters");
-    string duration = doubletostr(83.124794);
-    string position = doubletostr(14.467000);
+    //add duration here
+    string duration = doubletostr(15);
+    string position = doubletostr(1);
 
     string msg_reponse = "";
     msg_reponse = msg_reponse + "duration: " + duration + "\nposition: " + position;
