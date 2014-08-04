@@ -39,10 +39,8 @@ void get_getProperty(const char *argument, http_response_t *res);
 http_request_t *post_event_slideshow();
 // send the playback state to the client.
 http_request_t *post_event_video();
-void stop_photo_session(const Request &rq, http_response_t *res);
 
 void post_reverse(const Request &rq, http_response_t *res);
-
 
 //For each request rq, excute callback
 //sock: socket client

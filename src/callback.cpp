@@ -4,11 +4,13 @@
 #include "pugixml.hpp"
 #include <cstring>
 #include <map>
+#include <vector>
 #include <string>
 #include <boost/any.hpp>
 #include "Plist.hpp"
 
 using std::cout;
+using std::vector;
 
 std::map<string, string> params_map;
 enum state_param {KEY, VALUE};
@@ -31,7 +33,7 @@ void callback_excute(const int &sock, const Request &rq)
     // int value = boost::any_cast<const int64_t &>(dictValue.find("value")->second);
 
     // cout << "epoch = " << epoch << "\n";
-    // cout << "flags = " << flags << "\n"; 
+    // cout << "flags = " << flags << "\n";
     // cout << "timescale = " << timescale << "\n";
     // cout << "value = " << value << "\n";
 
@@ -202,6 +204,9 @@ void put_photo(const Request &rq, http_response_t *res)
     string x_apple_assetKey = map["X-Apple-AssetKey"];
     string x_apple_transition = map["X-Apple-Transition"];
     string x_apple_assetAction = map["X-Apple-AssetAction"];
+
+    // Data photo contained in rq.data;
+
     if (x_apple_transition == "Dissolve")
     {
         //if picture using the dissolve transition
@@ -240,7 +245,7 @@ void put_slideshow_session(const Request &rq, http_response_t *res)
     string state = boost::any_cast<const string &>(dict.find("state")->second);
 
     cout << "slideDuration = " << slideDuration << "\n";
-    cout << "theme = " << theme << "\n"; 
+    cout << "theme = " << theme << "\n";
     cout << "state = " << state << "\n";
 
     http_response_add_header(res, "Content-Type", "text/x-apple-plist+xml");
@@ -258,14 +263,6 @@ void put_slideshow_session(const Request &rq, http_response_t *res)
 
 }
 
-void fetch_photo(http_response_t *res)
-{
-
-}
-void post_stop_photo_slideshow(const Request &rq, http_response_t *res)
-{
-
-}
 //notifies a client that a photo session has ended.
 http_request_t *post_event_photo()
 {
@@ -361,37 +358,19 @@ void post_play(const Request &rq, http_response_t *res)
     else if (rq.get_headers_map()["Content-Type"] == "application/x-apple-binary-plist")
     {
         //cout << "application/x-apple-binary-plist" << "\n";
-        char *data = rq.get_data();
-        char *binary_data = strsep(&data, "\r\n\r\n"); // BINARY PLIST DATA
-        char *xml = data;
+        // char *data = rq.get_data();
+        // char *binary_data = strsep(&data, "\r\n\r\n"); // BINARY PLIST DATA
+        // char *xml = data;
 
         params_map.clear();
-        state_params = KEY;
-        //std::cout << "DATA:" << rq.get_data() << "\n";
-        pugi::xml_document doc;
 
-        {
-            pugi::xml_parse_result result = doc.load_buffer(xml, strlen(xml));
-            pugi::xpath_node first_key = doc.select_single_node("plist/dict/key");
-            for (pugi::xml_node node = first_key.node(); node; node = node.next_sibling())
-            {
+        map<string, boost::any> dict;
+        Plist::readPlist(rq.get_data(), rq.get_len_data(), dict);
+        string content_location = boost::any_cast<const string &>(dict.find("Content-Location")->second);
+        double start_position = boost::any_cast<const double &>(dict.find("Start-Position")->second);
 
-                if (strcmp(node.child_value(), ""))
-                {
-                    // std::cout << "Value: " << node.child_value() << "\n";
-                    if (state_params == KEY)
-                    {
-                        last_key = node.child_value();
-                        state_params = VALUE;
-                    }
-                    else
-                    {
-                        params_map[last_key] = node.child_value();
-                        state_params = KEY;
-                    }
-                }
-            }
-        }
+        cout << "Content-Location: " << content_location << "\n";
+        cout << "Start-Position: " << start_position << "\n";
     }
     http_response_finish(res, NULL, 0);
 }
@@ -402,8 +381,8 @@ void post_scrub(const char *argument, http_response_t *res)
     params_map.clear();
     //cout << data << "\n";
     attrs_map_str_parse(params_map, argument);
-    cout << params_map["position"] << "\n";
-    http_response_finish(res, NULL, 0);
+    cout << params_map["position"] << "\n"
+         ;    http_response_finish(res, NULL, 0);
 }
 
 //Change the playback rate.
@@ -496,12 +475,12 @@ void get_playback_info(http_response_t *res)
 //Set playback property.
 void put_setProperty(const char *argument, const Request &rq, http_response_t *res)
 {
-    char *data = rq.get_data();
-    char *binary_data = strsep(&data, "\r\n\r\n"); // BINARY PLIST DATA
-    char *xml = data;
+    // char *data = rq.get_data();
+    // char *binary_data = strsep(&data, "\r\n\r\n"); // BINARY PLIST DATA
+    // char *xml = data;
 
     map<string, boost::any> dict;
-    Plist::readPlist(xml, strlen(xml), dict);
+    Plist::readPlist(rq.get_data(), rq.get_len_data(), dict);
     const map<string, boost::any> &dictValue = boost::any_cast<const map<string, boost::any>&>(dict.find("value")->second);
 
     int epoch = boost::any_cast<const int64_t &>(dictValue.find("epoch")->second);
@@ -510,12 +489,11 @@ void put_setProperty(const char *argument, const Request &rq, http_response_t *r
     int value = boost::any_cast<const int64_t &>(dictValue.find("value")->second);
 
     cout << "epoch = " << epoch << "\n";
-    cout << "flags = " << flags << "\n"; 
+    cout << "flags = " << flags << "\n";
     cout << "timescale = " << timescale << "\n";
     cout << "value = " << value << "\n";
 
-    string errorCode = "0";
-    char *binary_data_reponse = NULL;
+    int errorCode = 0;
 
     if (!strcmp(argument, "forwardEndTime"))
     {
@@ -527,78 +505,60 @@ void put_setProperty(const char *argument, const Request &rq, http_response_t *r
     }
 
     http_response_add_header(res, "Content-Type", "application/x-apple-binary-plist");
-    string msg_reponse = "\r\n";
-    msg_reponse = msg_reponse + "<?xml version=\"1.0\" encoding=\"UTF-8\"?>" + "\n"
-                  + "<!DOCTYPE plist PUBLIC \"-//Apple//DTD PLIST 1.0//EN\"" + "\n"
-                  + "\"http://www.apple.com/DTDs/PropertyList-1.0.dtd\">" + "\n"
-                  + "<plist version=\"1.0\">" + "\n"
-                  + "<dict>" + "\n"
-                  + "<key>errorCode</key>" + "\n"
-                  + "<integer>" + errorCode + "</integer>" + "\n"
-                  + "</dict>" + "\n"
-                  + "</plist>" + "\n";
-    const char *msg = str_concat(binary_data_reponse, msg_reponse.c_str());
-    http_response_finish(res, msg, strlen(msg));
-    delete[] msg;
-    //delete binary_data_reponse
+
+    map<string, boost::any> dictRes;
+    dictRes["errorCode"] = int64_t(error);
+
+    vector<char> msg;
+    Plist::writePlistBinary(msg, dictRes);
+    http_response_finish(res, reinterpret_cast<char *> (&msg[0]), msg.size());
 }
 
 //Get playback property.
 void get_getProperty(const char *argument, http_response_t *res)
 {
 
-    string msg_reponse = "\r\n\r\n";
-    char *binary_data_reponse = NULL;
+    map<string, boost::any> dictRes;
 
     if (!strcmp(argument, "playbackAccessLog"))
     {
         //get playback access log
-        string errorCode = "0";
-        string value_bytes = "1818336";
-        string value_c_duration_downloaded = "70";
-        string value_c_duration_watched = "18.154102027416229";
-        string value_c_frames_dropped = "0";
-        string value_c_observed_bitrate = "14598047.302367469";
-        string value_c_overdue = "0";
-        string value_c_stalls = "0";
-        string value_c_start_time = "0.0";
-        string value_c_startup_time = "0.27732497453689575";
+        int errorCode = 0;
+        int value_bytes = 1818336;
+        double value_c_duration_downloaded = 70;
+        double value_c_duration_watched = 18.154102027416229;
+        int value_c_frames_dropped = 0;
+        double value_c_observed_bitrate = 14598047.302367469;
+        int value_c_overdue = 0;
+        int value_c_stalls = 0;
+        double value_c_start_time = 0.0;
+        double value_c_startup_time = 0.27732497453689575;
         string value_cs_guid = "B475F105-78FD-4200-96BC-148BAB6DAC11";
-        string value_date = "2012-03-16T15:31:24Z";
         string value_s_ip = "213.152.6.89";
-        string value_s_ip_changes = "0";
-        string value_sc_count = "7";
+        int value_s_ip_changes = 0;
+        int value_sc_count = 7;
         string value_uri = "http://devimages.apple.com/iphone/samples/bipbop/gear1/prog_index.m3u8";
 
-        msg_reponse = msg_reponse + "<?xml version=\"1.0\" encoding=\"UTF-8\"?>" + "\n"
-                      + "<!DOCTYPE plist PUBLIC \"-//Apple//DTD PLIST 1.0//EN\"" + "\n"
-                      + "\"http://www.apple.com/DTDs/PropertyList-1.0.dtd\">" + "\n"
-                      + "<plist version=\"1.0\">" + "\n"
-                      + "<dict>" + "\n"
-                      + "<key>errorCode</key>" + "\n"
-                      + "<integer>" + errorCode + "</integer>" + "\n"
-                      + "<key>value</key>" + "\n"
-                      + "<array>" + "\n"
-                      + "<dict>" + "\n"
-                      + "<key>bytes</key> <integer>" + value_bytes + "</integer>" + "\n"
-                      + "<key>c-duration-downloaded</key> <real>" + value_c_duration_downloaded + "</real>" + "\n"
-                      + "<key>c-duration-watched</key> <real>" + value_c_duration_watched + "</real>" + "\n"
-                      + "<key>c-frames-dropped</key> <integer>" + value_c_frames_dropped + "</integer>" + "\n"
-                      + "<key>c-observed-bitrate</key> <real>" + value_c_observed_bitrate + "</real>" + "\n"
-                      + "<key>c-overdue</key> <integer>" + value_c_overdue + "</integer>" + "\n"
-                      + "<key>c-stalls</key> <integer>" + value_c_stalls + "</integer>" + "\n"
-                      + "<key>c-start-time</key> <real>" + value_c_start_time + "</real>" + "\n"
-                      + "<key>c-startup-time</key> <real>" + value_c_startup_time + "</real>" + "\n"
-                      + "<key>cs-guid</key> <string>" + value_cs_guid + "</string>" + "\n"
-                      + "<key>date</key> <date>" + value_date + "</date>" + "\n"
-                      + "<key>s-ip</key> <string>" + value_s_ip + "</string>" + "\n"
-                      + "<key>s-ip-changes</key> <integer>" + value_s_ip_changes + "</integer>" + "\n"
-                      + "<key>sc-count</key> <integer>" + value_sc_count + "</integer>" + "\n"
-                      + "<key>uri</key> <string>" + value_uri + "</string>" + "\n"
-                      + "</dict>" + "\n"
-                      + "</array>" + "\n"
-                      + "</dict>" + "\n"
-                      + "</plist>" + "\n";
+        dictRes["errorCode"] = int64_t(errorCode);
+        vector<boost::any> array(1);
+        map<string, boost::any> valueDict;
+        valueDict["bytes"] = int64_t(value_bytes);
+        valueDict["c-duration-downloaded"] = value_c_duration_downloaded;
+        valueDict["c-duration-watched"] = value_c_duration_watched;
+        valueDict["c-frames-dropped"] = int64_t(value_c_frames_dropped);
+        valueDict["c-observed-bitrate"] = value_c_observed_bitrate;
+        valueDict["c-overdue"] = int64_t(value_c_overdue);
+        valueDict["c-stalls"] = int64_t(value_c_stalls);
+        valueDict["c-start-time"] = value_c_start_time;
+        valueDict["c-startup-time"] = value_c_startup_time;
+        valueDict["cs-guid"] = string(value_cs_guid);
+        valueDict["s-ip"] = string(value_s_ip);
+        valueDict["s-ip-changes"] = int64_t(value_s_ip_changes);
+        valueDict["sc-count"] = int(value_sc_count);
+        valueDict["uri"] = string(value_uri);
+
+        array[0] = valueDict;
+        valueDict["value"] = array;
     }
     else if (!strcmp(argument, "playbackErrorLog"))
     {
@@ -607,10 +567,9 @@ void get_getProperty(const char *argument, http_response_t *res)
 
     http_response_add_header(res, "Content-Type", "application/x-apple-binary-plist");
 
-    const char *msg = str_concat(binary_data_reponse, msg_reponse.c_str());
-    http_response_finish(res, msg, strlen(msg));
-    delete[] msg;
-    //delete binary_data_reponse
+    vector<char> msg;
+    Plist::writePlistBinary(msg, dictRes);
+    http_response_finish(res, reinterpret_cast<char *> (&msg[0]), msg.size());
 }
 void notify_event(const Request &rq, http_response_t *res)
 {
