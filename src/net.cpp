@@ -5,7 +5,9 @@
 #include <cstring>
 #include "util.hpp"
 
-int net_bind_socket(int port){
+const int port = 7000;
+
+int net_bind_socket(){
 	int sockfd, newsockfd, pid;
     struct sockaddr_in serv_addr;
 

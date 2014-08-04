@@ -18,14 +18,9 @@ int main(int argc, char *argv[])
     socklen_t clilen;
     struct sockaddr_in cli_addr;
 
-    if (argc < 2)
-    {
-        error("ERROR, no port provided\n");
-    }
-
     clilen = sizeof(cli_addr);
 
-    sockfd = net_bind_socket(atoi(argv[1]));
+    sockfd = net_bind_socket();
 
     newsockfd = accept(sockfd,
                        (struct sockaddr *) &cli_addr, &clilen);

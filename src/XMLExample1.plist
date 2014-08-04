@@ -1,0 +1,13 @@
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN"
+ "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+ <dict>
+  <key>value</key>
+  <dict>
+   <key>epoch</key> <integer>0</integer>
+   <key>flags</key> <integer>0</integer>
+   <key>timescale</key> <integer>0</integer>
+   <key>value</key> <integer>0</integer>
+  </dict>
+ </dict>
+</plist>
