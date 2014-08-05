@@ -23,19 +23,6 @@ void send_error_not_found(http_response_t *res);
 void callback_excute(const int &sock, const Request &rq)
 {
 
-    //  map<string, boost::any> dict;
-    //   Plist::readPlist("XMLExample1.plist", dict);
-    // const map<string, boost::any> &dictValue = boost::any_cast<const map<string, boost::any>&>(dict.find("value")->second);
-
-    // int epoch = boost::any_cast<const int64_t &>(dictValue.find("epoch")->second);
-    // int flags = boost::any_cast<const int64_t &>(dictValue.find("flags")->second);
-    // int timescale = boost::any_cast<const int64_t &>(dictValue.find("timescale")->second);
-    // int value = boost::any_cast<const int64_t &>(dictValue.find("value")->second);
-
-    // cout << "epoch = " << epoch << "\n";
-    // cout << "flags = " << flags << "\n";
-    // cout << "timescale = " << timescale << "\n";
-    // cout << "value = " << value << "\n";
 
     http_response_t *res = NULL;
     // headers_map = get_headers_map();
@@ -80,6 +67,12 @@ void callback_excute(const int &sock, const Request &rq)
             cout << "GET /getProperty\n";
             get_getProperty(url.c_str() + strlen("/getProperty?"), res);
         }
+         else if (!url.compare("/stream.xml"))
+        {
+            //fetch mirroring server informations
+            cout << "GET /stream.xml\n";
+            get_stream(res);
+        }
         else
         {
             send_error_not_found(res);
@@ -115,6 +108,12 @@ void callback_excute(const int &sock, const Request &rq)
             //Change the playback rate.
             cout << "POST /rate\n";
             post_rate(url.c_str() + strlen("/rate?"), res);
+        }
+         else if (!url.compare("/stream"))
+        {
+            //Start the live video transmission.
+            cout << "POST /stream\n";
+            post_stream(rq, res);
         }
         else
         {
@@ -694,7 +693,7 @@ void get_stream(http_response_t *res)
 }
 
 //The client sends a binary property list with information about the stream
-void post_stream(const char *argument, http_response_t *res)
+void post_stream(const Request &rq, http_response_t *res)
 {
     int deviceID;
     int latencyMs;
@@ -746,8 +745,10 @@ void post_stream(const char *argument, http_response_t *res)
 
     cout << "deviceID = " << deviceID << "\n";
     cout << "latencyMs = " << latencyMs << "\n";
-    cout << "param1 = " << param1 << "\n";
-    cout << "param2 = " << param2 << "\n";
+    //cout << "param1 = " << param1 << "\n";
+    //cout << "param2 = " << param2 << "\n";
     cout << "sessionID = " << sessionID << "\n";
     cout << "version = " << version << "\n";
+
+    http_response_finish(res, NULL, 0);
 }

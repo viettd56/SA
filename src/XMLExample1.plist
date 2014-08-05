@@ -1,13 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN"
  "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
  <dict>
-  <key>value</key>
-  <dict>
-   <key>epoch</key> <integer>0</integer>
-   <key>flags</key> <integer>0</integer>
-   <key>timescale</key> <integer>0</integer>
-   <key>value</key> <integer>0</integer>
-  </dict>
+  <key>deviceID</key>
+  <integer>181221086727016</integer>
+  <key>fpsInfo</key>
+  <array>
+   <dict> <key>name</key> <string>SubS</string> </dict>
+   <dict> <key>name</key> <string>B4En</string> </dict>
+   <dict> <key>name</key> <string>EnDp</string> </dict>
+   <dict> <key>name</key> <string>IdEn</string> </dict>
+   <dict> <key>name</key> <string>IdDp</string> </dict>
+   <dict> <key>name</key> <string>EQDp</string> </dict>
+   <dict> <key>name</key> <string>QueF</string> </dict>
+   <dict> <key>name</key> <string>Sent</string> </dict>
+  </array>
+  <key>latencyMs</key>
+  <integer>90</integer>
+  <key>param1</key>
+  <data>
+  RlBMWQECAQAAAAA8AAAAANvKuDizduszL1hG9IvIk+AAAAAQukdPJ5Jw/gGBAl22WZdF
+  m9ujZEGIV7jm3ZByWm51HjpDwjYY
+  </data>
+  <key>param2</key>
+  <data>
+  3qpOHtYWbBPyEWPnGt1BuQ==
+  </data>
+  <key>sessionID</key>
+  <integer>-808788724</integer>
+  <key>timestampInfo</key>
+  <array>
+   <dict> <key>name</key> <string>SubSu</string> </dict>
+   <dict> <key>name</key> <string>BePxT</string> </dict>
+   <dict> <key>name</key> <string>AfPxT</string> </dict>
+   <dict> <key>name</key> <string>BefEn</string> </dict>
+   <dict> <key>name</key> <string>EmEnc</string> </dict>
+   <dict> <key>name</key> <string>QueFr</string> </dict>
+   <dict> <key>name</key> <string>SndFr</string> </dict>
+  </array>
+  <key>version</key>
+  <string>130.16</string>
  </dict>
 </plist>
