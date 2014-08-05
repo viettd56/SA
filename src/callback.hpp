@@ -42,6 +42,12 @@ http_request_t *post_event_video();
 
 void post_reverse(const Request &rq, http_response_t *res);
 
+//Retrieve information about the server capabilities.
+void get_stream(http_response_t *res);
+
+//The client sends a binary property list with information about the stream
+void post_stream(const char *argument, http_response_t *res);
+
 //For each request rq, excute callback
 //sock: socket client
 void callback_excute(const int &sock, const Request &rq);

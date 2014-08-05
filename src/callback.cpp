@@ -666,3 +666,88 @@ void send_error_not_found(http_response_t *res)
     res = http_response_init("HTTP/1.1", 404, "Not Found");
     http_response_finish(res, NULL, 0);
 }
+
+//Retrieve information about the server capabilities.
+void get_stream(http_response_t *res)
+{
+
+
+    int height = 720;
+    bool overscanned = true;
+    double refreshRate = 0.016666666666666666;
+    string version = "130.14";
+    int width = 1280;
+
+
+    http_response_add_header(res, "Content-Type", "text/x-apple-plist+xml");
+
+    map<string, boost::any> dictRes;
+    dictRes["height"] = int64_t(height);
+    dictRes["overscanned"] = overscanned;
+    dictRes["refreshRate"] = refreshRate;
+    dictRes["version"] = string(version);
+    dictRes["width"] = int64_t(width);
+
+    vector<char> msg;
+    Plist::writePlistXML(msg, dictRes);
+    http_response_finish(res, reinterpret_cast<char *> (&msg[0]), msg.size());
+}
+
+//The client sends a binary property list with information about the stream
+void post_stream(const char *argument, http_response_t *res)
+{
+    int deviceID;
+    int latencyMs;
+    vector<string> fpsInfo;
+    vector<char> param1;
+    vector<char> param2;
+    int sessionID;
+    string version;
+    vector<string> timestampInfo;
+
+    map<string, boost::any> dict;
+    Plist::readPlist(rq.get_data(), rq.get_len_data(), dict);
+
+    //deviceID
+    deviceID = boost::any_cast<const int64_t &>(dict.find("deviceID")->second);
+
+    //FpsInfo
+    const vector<boost::any> &arrayFpsInfo = boost::any_cast<const vector<boost::any>&>(dict.find("fpsInfo")->second);
+    for (int i = 0; i < arrayFpsInfo.size(); i++)
+    {
+        const map<string, boost::any> &dictFpsInfo = boost::any_cast<const map<string, boost::any>&>(arrayFpsInfo[i]);
+        fpsInfo.push_back(boost::any_cast<const string &>(dictFpsInfo.find("name")->second));
+        cout << fpsInfo[i];
+    }
+
+    //latencyMs
+    latencyMs = boost::any_cast<const int64_t &>(dict.find("latencyMs")->second);
+
+    //param1
+    param1 = boost::any_cast<const vector<char> &>(dict.find("param1")->second);
+
+    //param2
+    param2 = boost::any_cast<const vector<char> &>(dict.find("param2")->second);
+
+    //sessionID
+    sessionID = boost::any_cast<const int64_t &>(dict.find("sessionID")->second);
+
+    //timestampInfo
+    const vector<boost::any> &arrayTimestampInfo = boost::any_cast<const vector<boost::any>&>(dict.find("timestampInfo")->second);
+    for (int i = 0; i < arrayTimestampInfo.size(); i++)
+    {
+        const map<string, boost::any> &dictTimestampInfo = boost::any_cast<const map<string, boost::any>&>(arrayTimestampInfo[i]);
+        timestampInfo.push_back(boost::any_cast<const string &>(dictTimestampInfo.find("name")->second));
+        cout << timestampInfo[i];
+    }
+
+    //version
+    version = boost::any_cast<const string &>(dict.find("version")->second);
+
+    cout << "deviceID = " << deviceID << "\n";
+    cout << "latencyMs = " << latencyMs << "\n";
+    cout << "param1 = " << param1 << "\n";
+    cout << "param2 = " << param2 << "\n";
+    cout << "sessionID = " << sessionID << "\n";
+    cout << "version = " << version << "\n";
+}

@@ -5,9 +5,10 @@
 #include <cstring>
 #include "util.hpp"
 
-const int port = 7000;
+const int port_airplay = 7000;
+const int port_screen_mirror = 7100;
 
-int net_bind_socket(){
+int net_bind_socket(int port){
 	int sockfd, newsockfd, pid;
     struct sockaddr_in serv_addr;
 
@@ -26,4 +27,11 @@ int net_bind_socket(){
     listen(sockfd, 5);
 
     return sockfd;
+}
+
+int net_bind_socket_airplay(){
+    return net_bind_socket(port_airplay);
+}
+int net_bind_socket_screen_mirror(){
+    return net_bind_socket(port_screen_mirror);
 }
