@@ -67,7 +67,7 @@ void callback_excute(const int &sock, const Request &rq)
             cout << "GET /getProperty\n";
             get_getProperty(url.c_str() + strlen("/getProperty?"), res);
         }
-         else if (!url.compare("/stream.xml"))
+        else if (!url.compare("/stream.xml"))
         {
             //fetch mirroring server informations
             cout << "GET /stream.xml\n";
@@ -109,11 +109,11 @@ void callback_excute(const int &sock, const Request &rq)
             cout << "POST /rate\n";
             post_rate(url.c_str() + strlen("/rate?"), res);
         }
-         else if (!url.compare("/stream"))
+        else if (!url.compare("/stream"))
         {
             //Start the live video transmission.
             cout << "POST /stream\n";
-            post_stream(rq, res);
+            post_stream(rq, res, sock);
         }
         else
         {
@@ -151,13 +151,15 @@ void callback_excute(const int &sock, const Request &rq)
         send_error_method_not_allowed(res);
     }
 
-    int datalen;
-    // http_response_finish(res, NULL, 0);
-    const char *data_res = http_response_get_data(res, &datalen);
+    if (res != NULL)
+    {
+        int datalen;
+        // http_response_finish(res, NULL, 0);
+        const char *data_res = http_response_get_data(res, &datalen);
 
-    send_to_socket(sock, data_res, datalen);
-    http_response_destroy(res);
-
+        send_to_socket(sock, data_res, datalen);
+        http_response_destroy(res);
+    }
     //------------------------------------------------
 
     // http_request_t *req = post_event_video();
@@ -693,7 +695,7 @@ void get_stream(http_response_t *res)
 }
 
 //The client sends a binary property list with information about the stream
-void post_stream(const Request &rq, http_response_t *res)
+void post_stream(const Request &rq, http_response_t *res, const int &sock)
 {
     int deviceID;
     int latencyMs;
@@ -710,6 +712,8 @@ void post_stream(const Request &rq, http_response_t *res)
     //deviceID
     deviceID = boost::any_cast<const int64_t &>(dict.find("deviceID")->second);
 
+    cout << "FpsInfo: ";
+
     //FpsInfo
     const vector<boost::any> &arrayFpsInfo = boost::any_cast<const vector<boost::any>&>(dict.find("fpsInfo")->second);
     for (int i = 0; i < arrayFpsInfo.size(); i++)
@@ -718,6 +722,8 @@ void post_stream(const Request &rq, http_response_t *res)
         fpsInfo.push_back(boost::any_cast<const string &>(dictFpsInfo.find("name")->second));
         cout << fpsInfo[i];
     }
+
+    cout << "\n";
 
     //latencyMs
     latencyMs = boost::any_cast<const int64_t &>(dict.find("latencyMs")->second);
@@ -731,6 +737,8 @@ void post_stream(const Request &rq, http_response_t *res)
     //sessionID
     sessionID = boost::any_cast<const int64_t &>(dict.find("sessionID")->second);
 
+    cout << "timestampInfo: ";
+
     //timestampInfo
     const vector<boost::any> &arrayTimestampInfo = boost::any_cast<const vector<boost::any>&>(dict.find("timestampInfo")->second);
     for (int i = 0; i < arrayTimestampInfo.size(); i++)
@@ -739,6 +747,8 @@ void post_stream(const Request &rq, http_response_t *res)
         timestampInfo.push_back(boost::any_cast<const string &>(dictTimestampInfo.find("name")->second));
         cout << timestampInfo[i];
     }
+
+    cout << "\n";
 
     //version
     version = boost::any_cast<const string &>(dict.find("version")->second);
@@ -750,5 +760,38 @@ void post_stream(const Request &rq, http_response_t *res)
     cout << "sessionID = " << sessionID << "\n";
     cout << "version = " << version << "\n";
 
-    http_response_finish(res, NULL, 0);
+    http_response_destroy(res);
+    res = NULL;
+
+    //read headers stream packets
+    int n;
+    int BUFFER_SIZE = 128;
+    char buffer[BUFFER_SIZE];
+    n = read(sock, buffer, BUFFER_SIZE);
+    if (n < 0) error("ERROR reading from socket");
+    char payload_size[4];
+    char payload_type[2];
+    char something[2];
+    char ntp_timestamp[8];
+
+    memcpy(payload_size, buffer, 4);
+    memcpy(payload_type, buffer + 4, 2);
+    memcpy(something, buffer + 4 + 2, 2);
+    memcpy(ntp_timestamp, buffer + 4 + 2 + 2, 8);
+
+    // short i_payload_type = ntohs(payload_type);
+    // long i_payload_size = ntohl(payload_size);
+
+    // switch (i_payload_type)
+    // {
+    // case 0:
+    //     //video bitstream
+    //     break;
+    // case 1:
+    //     //codec data
+    //     break;
+    // case 2:
+    //     //heartbeat
+    //     break;
+    // }
 }
