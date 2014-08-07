@@ -46,7 +46,7 @@ void post_reverse(const Request &rq, http_response_t *res);
 void get_stream(http_response_t *res);
 
 //The client sends a binary property list with information about the stream
-void post_stream(const Request &rq, http_response_t *res, const int &sock);
+void post_stream(const Request &rq, http_response_t *&res, const int &sock);
 
 //For each request rq, excute callback
 //sock: socket client

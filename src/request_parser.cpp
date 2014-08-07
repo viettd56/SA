@@ -18,8 +18,11 @@ map<string, string> headers_map_parsed;
 map<string, string> params_map_parsed;
 string url = "";
 char *data = NULL;
+// char *data2 = new char[128]();
 int data_len = 0;
 int data_size = 0;
+// int data_len2 = 0;
+// int data_size2 = 0;
 
 // http parser callbacks
 int request_url_cb(http_parser *p, const char *buf, size_t len);
@@ -67,13 +70,18 @@ int header_value_cb(http_parser *p, const char *buf, size_t len)
 
 int body_cb(http_parser *p, const char *buf, size_t len)
 {
+
+    cout << "---------Body----------\n" << buf << "\n";
+
     if (data_len + len <= data_size)
     {
         memcpy(data + data_len, buf, len);
         data_len += len;
     }
+    // }
     // safe_copy(data, buf, len, data_size, data_len);
     // cout << "size:" << data_size << "\n" << "len:" << data_len << "\n" << len << "\n";
+    // cout << "size2:" << data_size2 << "\n" << "len2:" << data_len2 << "\n" << len << "\n";
 
     //cout << "data:" << data << "\n";
     return 0;
@@ -81,6 +89,7 @@ int body_cb(http_parser *p, const char *buf, size_t len)
 
 int headers_complete_cb(http_parser *p)
 {
+    cout << "on_headers_complete" << "\n";
     data_size = atoi(headers_map_parsed["Content-Length"].c_str());
     //cout << "--------------------" << data_size << "------------------------\n";
     data = new char[data_size]();
@@ -91,6 +100,7 @@ int headers_complete_cb(http_parser *p)
 
 int message_complete_cb(http_parser *p)
 {
+    cout << "message_complete_cb" << "\n";
     is_complete = true;
     return 0;
 }
@@ -122,14 +132,10 @@ void request_parser_init()
     headers_map_parsed.clear();
     params_map_parsed.clear();
 }
-int request_parser_excute(http_parser *parser, Request &rq, char *buf, char n)
+int request_parser_excute(http_parser *parser, Request &rq, char *buf, int n)
 {
     int nparsed = http_parser_execute(parser, &settings, buf, n);
-    if (nparsed != n)
-    {
-        error("http parser error");
-    }
-
+    cout << "nparsed: " << nparsed << "\nn:" << n << "\n";
     if (is_complete)
     {
         rq.set_headers_map(headers_map_parsed);
@@ -137,7 +143,7 @@ int request_parser_excute(http_parser *parser, Request &rq, char *buf, char n)
         rq.set_url(url);
         rq.set_method(convert_method(parser->method));
         rq.set_data(data, data_len);
-        //cout << data;
+        //cout << "URL: " << url << "\nBody: " <<  data << "\n";
         rq.set_len_data(data_len);
         if (data != NULL)
         {
@@ -146,6 +152,13 @@ int request_parser_excute(http_parser *parser, Request &rq, char *buf, char n)
         }
         return 0;
     }
+
+    if (nparsed != n)
+    {
+        error("http parser error");
+    }
+
+
 
     return 1;
 }

@@ -29,7 +29,7 @@ void callback_excute(const int &sock, const Request &rq)
     // params_map = get_params_map();
     string method = rq.get_method();
     string url = rq.get_url();
-    // cout << "method: " << method << "\n" << url << "\n";
+    //cout << "----------method: " << method << "\n" << url << "\n";
     // char *data = rq.get_data();
 
     res = http_response_init("HTTP/1.1", 200, "OK");
@@ -114,6 +114,7 @@ void callback_excute(const int &sock, const Request &rq)
             //Start the live video transmission.
             cout << "POST /stream\n";
             post_stream(rq, res, sock);
+            cout << "--------" << res << "\n";
         }
         else
         {
@@ -695,89 +696,87 @@ void get_stream(http_response_t *res)
 }
 
 //The client sends a binary property list with information about the stream
-void post_stream(const Request &rq, http_response_t *res, const int &sock)
+void post_stream(const Request &rq, http_response_t *&res, const int &sock)
 {
-    int deviceID;
-    int latencyMs;
+    string deviceID;
+    string latencyMs;
     vector<string> fpsInfo;
     vector<char> param1;
     vector<char> param2;
-    int sessionID;
+    string sessionID;
     string version;
     vector<string> timestampInfo;
+
+    FILE *fr = fopen("stream.plist", "wb");
+    write_to_file(fr, rq.get_data(), rq.get_len_data());
 
     map<string, boost::any> dict;
     Plist::readPlist(rq.get_data(), rq.get_len_data(), dict);
 
     //deviceID
-    deviceID = boost::any_cast<const int64_t &>(dict.find("deviceID")->second);
-
-    cout << "FpsInfo: ";
+    cout << "deviceID: " << "\n";
+    deviceID = boost::any_cast<const string &>(dict.find("deviceID")->second);
+    cout << deviceID << "\n";
 
     //FpsInfo
+    cout << "FpsInfo: " << "\n";
     const vector<boost::any> &arrayFpsInfo = boost::any_cast<const vector<boost::any>&>(dict.find("fpsInfo")->second);
     for (int i = 0; i < arrayFpsInfo.size(); i++)
     {
-        const map<string, boost::any> &dictFpsInfo = boost::any_cast<const map<string, boost::any>&>(arrayFpsInfo[i]);
-        fpsInfo.push_back(boost::any_cast<const string &>(dictFpsInfo.find("name")->second));
+        fpsInfo.push_back(boost::any_cast<const string &>(arrayFpsInfo[i]));
         cout << fpsInfo[i];
     }
-
     cout << "\n";
 
     //latencyMs
-    latencyMs = boost::any_cast<const int64_t &>(dict.find("latencyMs")->second);
+    cout << "latencyMs: ";
+    latencyMs = boost::any_cast<const string &>(dict.find("latencyMs")->second);
+    cout << latencyMs << "\n";
 
-    //param1
-    param1 = boost::any_cast<const vector<char> &>(dict.find("param1")->second);
+    // //param1
+    // param1 = boost::any_cast<const vector<char> &>(dict.find("param1")->second);
 
-    //param2
-    param2 = boost::any_cast<const vector<char> &>(dict.find("param2")->second);
+    // //param2
+    // param2 = boost::any_cast<const vector<char> &>(dict.find("param2")->second);
 
     //sessionID
-    sessionID = boost::any_cast<const int64_t &>(dict.find("sessionID")->second);
-
-    cout << "timestampInfo: ";
+    cout << "sessionID: " << "\n";
+    sessionID = boost::any_cast<const string &>(dict.find("sessionId")->second);
+    cout << sessionID << "\n";
 
     //timestampInfo
+    cout << "timestampInfo: ";
     const vector<boost::any> &arrayTimestampInfo = boost::any_cast<const vector<boost::any>&>(dict.find("timestampInfo")->second);
     for (int i = 0; i < arrayTimestampInfo.size(); i++)
     {
-        const map<string, boost::any> &dictTimestampInfo = boost::any_cast<const map<string, boost::any>&>(arrayTimestampInfo[i]);
-        timestampInfo.push_back(boost::any_cast<const string &>(dictTimestampInfo.find("name")->second));
+        timestampInfo.push_back(boost::any_cast<const string &>(arrayTimestampInfo[i]));
         cout << timestampInfo[i];
     }
-
     cout << "\n";
 
     //version
+    cout << "version: ";
     version = boost::any_cast<const string &>(dict.find("version")->second);
-
-    cout << "deviceID = " << deviceID << "\n";
-    cout << "latencyMs = " << latencyMs << "\n";
-    //cout << "param1 = " << param1 << "\n";
-    //cout << "param2 = " << param2 << "\n";
-    cout << "sessionID = " << sessionID << "\n";
-    cout << "version = " << version << "\n";
+    cout << version << "\n";
 
     http_response_destroy(res);
     res = NULL;
 
     //read headers stream packets
-    int n;
-    int BUFFER_SIZE = 128;
-    char buffer[BUFFER_SIZE];
-    n = read(sock, buffer, BUFFER_SIZE);
-    if (n < 0) error("ERROR reading from socket");
-    char payload_size[4];
-    char payload_type[2];
-    char something[2];
-    char ntp_timestamp[8];
+    // int n;
+    // int BUFFER_SIZE = 128;
+    // char buffer[BUFFER_SIZE];
+    // n = read(sock, buffer, BUFFER_SIZE);
+    // if (n < 0) error("ERROR reading from socket");
+    // char payload_size[4];
+    // char payload_type[2];
+    // char something[2];
+    // char ntp_timestamp[8];
 
-    memcpy(payload_size, buffer, 4);
-    memcpy(payload_type, buffer + 4, 2);
-    memcpy(something, buffer + 4 + 2, 2);
-    memcpy(ntp_timestamp, buffer + 4 + 2 + 2, 8);
+    // memcpy(payload_size, buffer, 4);
+    // memcpy(payload_type, buffer + 4, 2);
+    // memcpy(something, buffer + 4 + 2, 2);
+    // memcpy(ntp_timestamp, buffer + 4 + 2 + 2, 8);
 
     // short i_payload_type = ntohs(payload_type);
     // long i_payload_size = ntohl(payload_size);

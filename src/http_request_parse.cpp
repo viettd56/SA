@@ -33,9 +33,8 @@ void Http_request_parse::http_request_parse_excute()
         int n, nparsed;
         while (n = read(sock, buffer, BUFFER_SIZE))
         {
-
             if (n < 0) error("ERROR reading from socket");
-
+            //std::cout << "-----------data: " << buffer << "\n";
             if (request_parser_excute(&parser, rq, buffer, n) == 0)
             {
                 break;

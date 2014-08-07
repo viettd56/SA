@@ -158,6 +158,7 @@ void send_to_socket(int sock, const char *msg, int len_msg)
 {
     int nmsg = write(sock, msg, len_msg);
     if (nmsg < 0) error("ERROR writing to socket");
+    std::cout << "MSG: " << msg << "\n";
 }
 
 void safe_copy(char *&des, const char *src, const int &len_src, int &size_des, int &len_des)
@@ -189,20 +190,31 @@ string doubletostr(const double &t)
     return os.str();
 }
 
-char *str_concat(const char *str1, const char *str2) {
-  if (str1 == NULL) {
-    return strdup(str2);
-  }
+char *str_concat(const char *str1, const char *str2)
+{
+    if (str1 == NULL)
+    {
+        return strdup(str2);
+    }
 
-  if (str2 == NULL) {
-    return strdup(str1);
-  }
+    if (str2 == NULL)
+    {
+        return strdup(str1);
+    }
 
-  int len1 = strlen(str1), len2 = strlen(str2);
-  char *result = new char[strlen(str1) + strlen(str2) + 1]();
+    int len1 = strlen(str1), len2 = strlen(str2);
+    char *result = new char[strlen(str1) + strlen(str2) + 1]();
 
-  memcpy(result, str1, len1);
-  memcpy(result + len1, str2, len2 + 1);
+    memcpy(result, str1, len1);
+    memcpy(result + len1, str2, len2 + 1);
 
-  return result;
+    return result;
+}
+
+void write_to_file(FILE *fr, char *buffer, const int length)
+{
+    /* write data */
+    fflush(fr);
+    fwrite(buffer, sizeof(char), length, fr); /* write data to file */
+    fclose(fr);
 }

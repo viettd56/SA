@@ -10,7 +10,7 @@ using std::string;
 using std::map;
 
 void request_parser_init();
-int request_parser_excute(http_parser* parser, Request &rq, char* buf, char n); // return 0 if complete
+int request_parser_excute(http_parser* parser, Request &rq, char* buf, int n); // return 0 if complete
 string get_url();
 
 #endif
