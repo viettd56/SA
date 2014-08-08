@@ -9,8 +9,8 @@
 using std::string;
 using std::map;
 
-void request_parser_init();
-int request_parser_excute(http_parser* parser, Request &rq, char* buf, int n); // return 0 if complete
+void request_parser_init(const int &sk);
+void request_parser_excute(http_parser* parser, char* buf, int n);
 string get_url();
 
 #endif

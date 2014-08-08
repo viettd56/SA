@@ -1,6 +1,7 @@
 #include "request_parser.hpp"
 #include "http_parser.h"
 #include "util.hpp"
+#include "routing.hpp"
 #include <iostream>
 #include <cstring>
 #include <cstdlib>
@@ -12,11 +13,11 @@ string last_header_value = "";
 enum state {FIELD, VALUE};
 state last_state;
 http_parser_settings settings;
-bool is_complete;
 
 map<string, string> headers_map_parsed;
 map<string, string> params_map_parsed;
 string url = "";
+int sock = 0;
 char *data = NULL;
 // char *data2 = new char[128]();
 int data_len = 0;
@@ -101,27 +102,43 @@ int headers_complete_cb(http_parser *p)
 int message_complete_cb(http_parser *p)
 {
     cout << "message_complete_cb" << "\n";
-    is_complete = true;
-    return 0;
+	
+	Request rq;
+	rq.set_headers_map(headers_map_parsed);
+	rq.set_params_map(params_map_parsed);
+	rq.set_url(url);
+	rq.set_method(convert_method(parser->method));
+	rq.set_data(data, data_len);
+	//cout << "URL: " << url << "\nBody: " <<  data << "\n";
+	rq.set_len_data(data_len);
+	if (data != NULL)
+	{
+		delete[] data;
+		data = NULL;
+	}
+
+	routing_excute(sock, rq);
+    
+	return 0;
 }
 
-void request_parser_init()
+void request_parser_init(const int &sk)
 {
 
-    settings.on_header_field = header_field_cb;
-    settings.on_header_value = header_value_cb;
-    settings.on_url = request_url_cb;
-    settings.on_body = body_cb;
-    settings.on_headers_complete = headers_complete_cb;
-    settings.on_message_complete = message_complete_cb;
+    settings.on_header_field		=	header_field_cb;
+    settings.on_header_value		=	header_value_cb;
+    settings.on_url					=	request_url_cb;
+    settings.on_body				=	body_cb;
+    settings.on_headers_complete	=	headers_complete_cb;
+    settings.on_message_complete	=	message_complete_cb;
 
-    last_state = FIELD;
-    last_header_field = "";
-    last_header_value = "";
-    url = "";
-    is_complete = false;
-    data_len = 0;
-    data_size = 0;
+    last_state						=	FIELD;
+    last_header_field				=	"";
+    last_header_value				=	"";
+    url								=	"";
+	sock							=	sk;
+    data_len						=	0;
+    data_size						=	0;
 
     if (data != NULL)
     {
@@ -132,35 +149,16 @@ void request_parser_init()
     headers_map_parsed.clear();
     params_map_parsed.clear();
 }
-int request_parser_excute(http_parser *parser, Request &rq, char *buf, int n)
+void request_parser_excute(http_parser *parser, char *buf, int n)
 {
     int nparsed = http_parser_execute(parser, &settings, buf, n);
-    cout << "nparsed: " << nparsed << "\nn:" << n << "\n";
-    if (is_complete)
-    {
-        rq.set_headers_map(headers_map_parsed);
-        rq.set_params_map(params_map_parsed);
-        rq.set_url(url);
-        rq.set_method(convert_method(parser->method));
-        rq.set_data(data, data_len);
-        //cout << "URL: " << url << "\nBody: " <<  data << "\n";
-        rq.set_len_data(data_len);
-        if (data != NULL)
-        {
-            delete[] data;
-            data = NULL;
-        }
-        return 0;
-    }
 
+    cout << "nparsed: " << nparsed << "\nn:" << n << "\n";
     if (nparsed != n)
     {
         error("http parser error");
     }
 
-
-
-    return 1;
 }
 map<string, string> get_headers_map()
 {

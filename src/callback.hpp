@@ -2,7 +2,6 @@
 #define _callback_hpp_
 
 #include <string>
-#include "request.hpp"
 #include "http_response.h"
 #include "http_request.h"
 
@@ -47,9 +46,5 @@ void get_stream(http_response_t *res);
 
 //The client sends a binary property list with information about the stream
 void post_stream(const Request &rq, http_response_t *&res, const int &sock);
-
-//For each request rq, excute callback
-//sock: socket client
-void callback_excute(const int &sock, const Request &rq);
 
 #endif
