@@ -17,12 +17,9 @@ int main(int argc, char *argv[])
     socklen_t clilen;
     struct sockaddr_in cli_addr;
 
-    clilen = sizeof(cli_addr);
-
-    sockfd = net_bind_socket_screen_mirror();
-
-    newsockfd = accept(sockfd,
-                       (struct sockaddr *) &cli_addr, &clilen);
+    clilen      =   sizeof(cli_addr);
+    sockfd      =   net_bind_socket_screen_mirror();
+    newsockfd   =   accept(sockfd, (struct sockaddr *) &cli_addr, &clilen);
     if (newsockfd < 0)
         error("ERROR on accept");
 

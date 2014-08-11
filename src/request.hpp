@@ -25,12 +25,12 @@ public:
     int get_len_data() const;
     void set_len_data(const int &rhs);
 private:
-    map<string, string> map_headers;
-    map<string, string> map_params;
-    string url;
-    string method;
-    char *data;
-    int len_data;
+    map<string, string>     map_headers;
+    map<string, string>     map_params;
+    string                  url;
+    string                  method;
+    char                    *data;
+    int                     len_data;
 };
 
 #endif

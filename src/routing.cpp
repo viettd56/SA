@@ -3,6 +3,10 @@
 #include "http_request.h"
 #include "http_response.h"
 #include "callback.hpp"
+#include "util.hpp"
+#include <cstring>
+
+using std::cout;
 
 void send_error_method_not_allowed(http_response_t *res);
 void send_error_not_found(http_response_t *res);
@@ -11,15 +15,15 @@ void routing_excute(const int &sock, const Request &rq)
 {
 
 
-	http_response_t *res = NULL;
+	http_response_t 	*res 	= 	NULL;
 	// headers_map = get_headers_map();
 	// params_map = get_params_map();
-	string method = rq.get_method();
-	string url = rq.get_url();
+	string 				method 	= 	rq.get_method();
+	string 				url 	= 	rq.get_url();
 	//cout << "----------method: " << method << "\n" << url << "\n";
 	// char *data = rq.get_data();
 
-	res = http_response_init("HTTP/1.1", 200, "OK");
+	res 						= 	http_response_init("HTTP/1.1", 200, "OK");
 
 	if (!method.compare("GET"))
 	{
@@ -100,6 +104,13 @@ void routing_excute(const int &sock, const Request &rq)
 		{
 			//Start the live video transmission.
 			cout << "POST /stream\n";
+			post_stream(rq, res, sock);
+			cout << "--------" << res << "\n";
+		}
+		else if (!url.compare("/stream.xml/stream"))
+		{
+			//Start the live video transmission.
+			cout << "POST /stream.xml/stream\n";
 			post_stream(rq, res, sock);
 			cout << "--------" << res << "\n";
 		}

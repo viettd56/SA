@@ -4,6 +4,7 @@
 #include <string>
 #include "http_response.h"
 #include "http_request.h"
+#include "request.hpp"
 
 //List callback
 // A client can fetch the list of available transitions for slideshows.

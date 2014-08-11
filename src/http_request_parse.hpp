@@ -17,9 +17,9 @@ public:
     // Receive request from client and excute
     void http_request_parse_excute();
   private:
-    int sock;
-    std::map<string, string> headers_map;
-    std::map<string, string> params_map;
+    int 						sock;
+    std::map<string, string> 	headers_map;
+    std::map<string, string> 	params_map;
 };
 
 #endif

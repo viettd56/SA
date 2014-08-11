@@ -5,9 +5,9 @@ Request::Request()
 {
     map_headers.clear();
     map_params.clear();
-    url = "";
-    data = NULL;
-    len_data = 0;
+    url         =   "";
+    data        =   NULL;
+    len_data    =   0;
 }
 
 Request::~Request()
@@ -51,8 +51,8 @@ char *Request::get_data() const
 }
 void Request::set_data(const char *rhs, const int lenght)
 {
-    len_data = lenght;
-    data = new char[len_data]();
+    len_data    =   lenght;
+    data        =   new char[len_data]();
     memcpy(data, rhs, len_data);
 }
 

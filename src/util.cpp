@@ -46,8 +46,8 @@ void attrs_map_str_parse(std::map<string, string> &map, const char *str)
 
     while ((pair = strsep(&header_str, ";")) && pair != NULL)
     {
-        name = strsep(&pair, "=");
-        value = strsep(&pair, "=");
+        name    =   strsep(&pair, "=");
+        value   =   strsep(&pair, "=");
 
         string str_name(str_trim(name));
         string str_value(str_trim(str_strip_quotes(value)));
@@ -70,8 +70,8 @@ void msgs_map_str_parse(std::map<string, string> &map, const char *str)
     while ((pair = strsep(&header_str, "\n")) && pair != NULL && strcmp(pair, ""))
     {
         //std::cout << "pair: " << pair << "\n";
-        name = strsep(&pair, ":");
-        value = pair;
+        name    =   strsep(&pair, ":");
+        value   =   pair;
 
         string str_name(str_trim(name));
         string str_value(str_trim(value));

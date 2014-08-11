@@ -8,20 +8,21 @@
 
 using std::cout;
 
-string last_header_field = "";
-string last_header_value = "";
+string  last_header_field       =   "";
+string  last_header_value       =   "";
+string  url                     =   "";
+int     sock                    =   0;
+char    *data                   =   NULL;
+int     data_len                =   0;
+int     data_size               =   0;
+
 enum state {FIELD, VALUE};
 state last_state;
 http_parser_settings settings;
 
 map<string, string> headers_map_parsed;
 map<string, string> params_map_parsed;
-string url = "";
-int sock = 0;
-char *data = NULL;
 // char *data2 = new char[128]();
-int data_len = 0;
-int data_size = 0;
 // int data_len2 = 0;
 // int data_size2 = 0;
 
@@ -36,6 +37,7 @@ int message_complete_cb(http_parser *p);
 int request_url_cb(http_parser *p, const char *buf, size_t len)
 {
     url = str_nconcat_char(url, buf, len);
+    cout << "------------------------url:" << url << "\n";
     return 0;
 }
 
@@ -91,9 +93,9 @@ int body_cb(http_parser *p, const char *buf, size_t len)
 int headers_complete_cb(http_parser *p)
 {
     cout << "on_headers_complete" << "\n";
-    data_size = atoi(headers_map_parsed["Content-Length"].c_str());
+    data_size   =   atoi(headers_map_parsed["Content-Length"].c_str());
     //cout << "--------------------" << data_size << "------------------------\n";
-    data = new char[data_size]();
+    data        =   new char[data_size]();
     //cout << "-------------------" << (int *)data << "\n";
     return 0;
 }
@@ -107,7 +109,8 @@ int message_complete_cb(http_parser *p)
 	rq.set_headers_map(headers_map_parsed);
 	rq.set_params_map(params_map_parsed);
 	rq.set_url(url);
-	rq.set_method(convert_method(parser->method));
+	rq.set_method(convert_method(p->method));
+    cout << "-----method:" << rq.get_method() << "\n";
 	rq.set_data(data, data_len);
 	//cout << "URL: " << url << "\nBody: " <<  data << "\n";
 	rq.set_len_data(data_len);
@@ -118,6 +121,7 @@ int message_complete_cb(http_parser *p)
 	}
 
 	routing_excute(sock, rq);
+    request_parser_init(sock);
     
 	return 0;
 }
