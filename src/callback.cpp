@@ -601,34 +601,49 @@ void post_stream(const Request &rq, http_response_t *&res, const int &sock)
     int n;
     const int BUFFER_SIZE = 128;
     char buffer[BUFFER_SIZE];
-    n = read(sock, buffer, BUFFER_SIZE);
+   n = read(sock, buffer, BUFFER_SIZE);
     if (n < 0) error("ERROR reading from socket");
     cout << "n: " << n << "\n";
-    cout << (int *) buffer << "\n";
-    cout << (short *) buffer + 4 << "\n";
+    cout << *((int *) buffer) << "\n";
+    cout << *((short *)(buffer + sizeof(int))) << "\n";
+    cout << *((short *)(buffer + sizeof(int) + sizeof(short))) << "\n";
 
-    header_stream_packets header;
+    //header_stream_packets header;
 
-    memcpy((char *)&header, buffer, sizeof(header));
+    //memcpy((char *)&header, buffer, sizeof(header));
 
-    const short payload_type = ntohs(header.payload_type);
-    const long payload_size = ntohl(header.payload_size);
+    short *payload_type = (short*)(buffer + sizeof(int));
+	cout << sizeof(int) << "\n";
+    int *payload_size = (int *) buffer;
+    
 
-    cout << "payload_size: " << payload_size << "\n";
-    cout << "payload_type: " << payload_type << "\n";
 
-    //char *buffer_payload = new char[payload_size]();
-    // while (n != 0)
-    // {
-    //     n = read(sock, buffer, BUFFER_SIZE);
-    //     cout << "reading n: " << n << "\n";
-    // }
+    cout << "payload_size: " << *payload_size << "\n";
+    cout << "payload_type: " << *payload_type << "\n";
+    
+	FILE *video = fopen("stream", "wb");
+	//write_to_file(video, buffer, 128);
+	//return;
 
-    switch (payload_type)
+	int length_loaded = 0;
+	n = 0;
+    char *buffer_payload = new char[*payload_size]();
+    length_loaded = read(sock, buffer_payload, *payload_size);
+	cout << "loaded: " << length_loaded << "\n";
+    if (length_loaded < 0) error("ERROR reading from socket");
+    
+      switch (*payload_type)
     {
     case 0:
         cout << "video bitstream" << "\n";
         //video bitstream
+	if (n < 5000000)
+	{
+		fflush(video);
+		fwrite(buffer_payload, sizeof(char), length_loaded, video);
+	} else {
+		fclose(video);
+	} 
         break;
     case 1:
         cout << "codec data" << "\n";
@@ -645,5 +660,7 @@ void post_stream(const Request &rq, http_response_t *&res, const int &sock)
         break;
     }
 
-    // delete[] buffer_payload;
+        delete[] buffer_payload;
 }
+
+

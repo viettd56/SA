@@ -156,7 +156,7 @@ void request_parser_init(const int &sk)
 void request_parser_excute(http_parser *parser, char *buf, int n)
 {
     int nparsed = http_parser_execute(parser, &settings, buf, n);
-
+	cout << "HTTP: " << buf << "\n";
     cout << "nparsed: " << nparsed << "\nn:" << n << "\n";
     if (nparsed != n)
     {
