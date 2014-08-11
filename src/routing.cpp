@@ -107,13 +107,6 @@ void routing_excute(const int &sock, const Request &rq)
 			post_stream(rq, res, sock);
 			cout << "--------" << res << "\n";
 		}
-		else if (!url.compare("/stream.xml/stream"))
-		{
-			//Start the live video transmission.
-			cout << "POST /stream.xml/stream\n";
-			post_stream(rq, res, sock);
-			cout << "--------" << res << "\n";
-		}
 		else
 		{
 			send_error_not_found(res);
