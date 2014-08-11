@@ -618,11 +618,11 @@ void post_stream(const Request &rq, http_response_t *&res, const int &sock)
     cout << "payload_type: " << payload_type << "\n";
 
     //char *buffer_payload = new char[payload_size]();
-    while (n != 0)
-    {
-        n = read(sock, buffer, BUFFER_SIZE);
-        cout << "reading n: " << n << "\n";
-    }
+    // while (n != 0)
+    // {
+    //     n = read(sock, buffer, BUFFER_SIZE);
+    //     cout << "reading n: " << n << "\n";
+    // }
 
     switch (payload_type)
     {
