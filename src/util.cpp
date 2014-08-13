@@ -7,6 +7,8 @@
 #include <iostream>
 #include <sstream>
 
+using std::cout;
+
 void error(const char *msg)
 {
     perror(msg);
@@ -36,7 +38,7 @@ string str_nconcat_char(const string &des, const char *src, int n)
     return des + str_src;
 }
 
-void attrs_map_str_parse(std::map<string, string> &map, const char *str)
+void attrs_quotes_map_str_parse(std::map<string, string> &map, const char *str)
 {
     char *pair, *name, *value, *header_str, *original_ptr;
     header_str = strdup(str);
@@ -58,6 +60,30 @@ void attrs_map_str_parse(std::map<string, string> &map, const char *str)
 
     free(original_ptr);
 }
+
+void attrs_brackets_map_str_parse(std::map<string, string> &map, const char *str)
+{
+    char *pair, *name, *value, *header_str, *original_ptr;
+    header_str = strdup(str);
+    original_ptr = header_str;
+
+    while (isspace(*header_str)) header_str++;
+
+    while ((pair = strsep(&header_str, "\n")) && pair != NULL && strcmp(pair, ""))
+    {
+        name    =   strsep(&pair, "=");
+        value   =   strsep(&pair, "=");
+
+        string str_name(str_trim(name));
+        string str_value(str_strip_brackets(str_trim(value)));
+
+        // map.insert (std::pair<string, string>(str_name, str_value));
+        map[str_name] = str_value;
+    }
+
+    free(original_ptr);
+}
+
 
 void msgs_map_str_parse(std::map<string, string> &map, const char *str)
 {
@@ -110,6 +136,11 @@ static bool is_quote(char c)
     return (c == '"' || c == '\'');
 }
 
+static bool is_bracket(char c)
+{
+    return (c == '[' || c == ']');
+}
+
 char *str_strip_quotes(char *str)
 {
     char *end;
@@ -125,6 +156,21 @@ char *str_strip_quotes(char *str)
 
     return str;
 }
+
+char *str_strip_brackets(char *str)
+{
+    char *end;
+    while (is_bracket(*str)) str++;
+    if (*str == 0) return str;
+
+    end = str + strlen(str) - 1;
+    while (end > str && is_bracket(*end)) end--;
+
+    *(end + 1) = 0;
+
+    return str;
+}
+
 
 string convert_method(int m)
 {
@@ -217,4 +263,17 @@ void write_to_file(FILE *fr, char *buffer, const int length)
     fflush(fr);
     fwrite(buffer, sizeof(char), length, fr); /* write data to file */
     fclose(fr);
+}
+
+std::string exec(const char* cmd) {
+    FILE* pipe = popen(cmd, "r");
+    if (!pipe) return "ERROR";
+    char buffer[128];
+    std::string result = "";
+    while(!feof(pipe)) {
+        if(fgets(buffer, 128, pipe) != NULL)
+            result += buffer;
+    }
+    pclose(pipe);
+    return result;
 }

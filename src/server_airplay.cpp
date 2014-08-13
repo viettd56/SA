@@ -14,9 +14,9 @@ int main(int argc, char *argv[])
 {
     system("avahi-publish -s 'Apple TV' _airplay._tcp 7000  deviceid=70:1a:04:4c:eb:a2 features=0x39f7 model=AppleTV2,1 srcvers=130.14 &");
 
-    int sockfd, newsockfd;
-    socklen_t clilen;
-    struct sockaddr_in cli_addr;
+    int         sockfd, newsockfd;
+    socklen_t   clilen;
+    struct      sockaddr_in cli_addr;
 
     clilen      =   sizeof(cli_addr);
     sockfd      =   net_bind_socket_airplay();

@@ -48,4 +48,8 @@ void get_stream(http_response_t *res);
 //The client sends a binary property list with information about the stream
 void post_stream(const Request &rq, http_response_t *&res, const int &sock);
 
+//server send command to remote control
+//list command: http://nto.github.io/AirPlay.html#audio-remotecontrol
+void send_command_to_remote_control(const string &command);
+
 #endif

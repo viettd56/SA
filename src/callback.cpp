@@ -28,21 +28,21 @@ void get_slideshow_features(http_response_t *res)
 
     string  msg_reponse  =   "";
     msg_reponse          =   msg_reponse + "<?xml version=\"1.0\" encoding=\"UTF-8\"?>" + "\n"
-                            + "<!DOCTYPE plist PUBLIC \"-//Apple//DTD PLIST 1.0//EN\"" + "\n"
-                            + "\"http://www.apple.com/DTDs/PropertyList-1.0.dtd\">" + "\n"
-                            + "<plist version=\"1.0\">" + "\n"
-                            + "<dict>" + "\n"
-                            + "<key>themes</key>" + "\n"
-                            + "<array>" + "\n"
-                            + "<dict>" + "\n"
-                            + "<key>key</key>" + "\n"
-                            + "<string>" + key + "</string>" + "\n"
-                            + "<key>name</key>" + "\n"
-                            + "<string>" + name + "</string>" + "\n"
-                            + "</dict>" + "\n"
-                            + "</array>" + "\n"
-                            + "</dict>" + "\n"
-                            + "</plist>" + "\n";
+                             + "<!DOCTYPE plist PUBLIC \"-//Apple//DTD PLIST 1.0//EN\"" + "\n"
+                             + "\"http://www.apple.com/DTDs/PropertyList-1.0.dtd\">" + "\n"
+                             + "<plist version=\"1.0\">" + "\n"
+                             + "<dict>" + "\n"
+                             + "<key>themes</key>" + "\n"
+                             + "<array>" + "\n"
+                             + "<dict>" + "\n"
+                             + "<key>key</key>" + "\n"
+                             + "<string>" + key + "</string>" + "\n"
+                             + "<key>name</key>" + "\n"
+                             + "<string>" + name + "</string>" + "\n"
+                             + "</dict>" + "\n"
+                             + "</array>" + "\n"
+                             + "</dict>" + "\n"
+                             + "</plist>" + "\n";
 
     const char *msg     =   msg_reponse.c_str();
     http_response_finish(res, msg, strlen(msg));
@@ -103,11 +103,11 @@ void put_slideshow_session(const Request &rq, http_response_t *res)
     // cout << params_map["theme"] << "\n";
     string  msg_reponse      =  "";
     msg_reponse              =  msg_reponse + "<?xml version=\"1.0\" encoding=\"UTF-8\"?>" + "\n"
-                            + "<!DOCTYPE plist PUBLIC \"-//Apple//DTD PLIST 1.0//EN\"" + "\n"
-                            + "\"http://www.apple.com/DTDs/PropertyList-1.0.dtd\">" + "\n"
-                            + "<plist version=\"1.0\">" + "\n"
-                            + "<dict/>" + "\n"
-                            + "</plist>" + "\n";
+                                + "<!DOCTYPE plist PUBLIC \"-//Apple//DTD PLIST 1.0//EN\"" + "\n"
+                                + "\"http://www.apple.com/DTDs/PropertyList-1.0.dtd\">" + "\n"
+                                + "<plist version=\"1.0\">" + "\n"
+                                + "<dict/>" + "\n"
+                                + "</plist>" + "\n";
     const char *msg          =   msg_reponse.c_str();
     http_response_finish(res, msg, strlen(msg));
     //cout << "res:" << res << "\n";
@@ -231,7 +231,7 @@ void post_scrub(const char *argument, http_response_t *res)
 {
     params_map.clear();
     //cout << data << "\n";
-    attrs_map_str_parse(params_map, argument);
+    attrs_quotes_map_str_parse(params_map, argument);
     cout << params_map["position"] << "\n"
          ;    http_response_finish(res, NULL, 0);
 }
@@ -241,7 +241,7 @@ void post_rate(const char *argument, http_response_t *res)
 {
     params_map.clear();
     //cout << data << "\n";
-    attrs_map_str_parse(params_map, argument);
+    attrs_quotes_map_str_parse(params_map, argument);
     cout << params_map["value"] << "\n";
     http_response_finish(res, NULL, 0);
 }
@@ -422,10 +422,6 @@ void get_getProperty(const char *argument, http_response_t *res)
     Plist::writePlistBinary(msg, dictRes);
     http_response_finish(res, reinterpret_cast<char *> (&msg[0]), msg.size());
 }
-void notify_event(const Request &rq, http_response_t *res)
-{
-
-}
 
 // notify the server about the playback state.
 http_request_t *post_event_slideshow()
@@ -598,69 +594,89 @@ void post_stream(const Request &rq, http_response_t *&res, const int &sock)
     res = NULL;
 
     //read headers stream packets
-    int n;
-    const int BUFFER_SIZE = 128;
-    char buffer[BUFFER_SIZE];
-   n = read(sock, buffer, BUFFER_SIZE);
-    if (n < 0) error("ERROR reading from socket");
-    cout << "n: " << n << "\n";
-    cout << *((int *) buffer) << "\n";
-    cout << *((short *)(buffer + sizeof(int))) << "\n";
-    cout << *((short *)(buffer + sizeof(int) + sizeof(short))) << "\n";
+    int         n;
+    const int   BUFFER_SIZE             = 128;
+    char        buffer[BUFFER_SIZE];
+    int         length_file             = 0;
+    FILE        *video                  = fopen("stream.avi", "ab");
 
-    //header_stream_packets header;
-
-    //memcpy((char *)&header, buffer, sizeof(header));
-
-    short *payload_type = (short*)(buffer + sizeof(int));
-	cout << sizeof(int) << "\n";
-    int *payload_size = (int *) buffer;
-    
-
-
-    cout << "payload_size: " << *payload_size << "\n";
-    cout << "payload_type: " << *payload_type << "\n";
-    
-	FILE *video = fopen("stream", "wb");
-	//write_to_file(video, buffer, 128);
-	//return;
-
-	int length_loaded = 0;
-	n = 0;
-    char *buffer_payload = new char[*payload_size]();
-    length_loaded = read(sock, buffer_payload, *payload_size);
-	cout << "loaded: " << length_loaded << "\n";
-    if (length_loaded < 0) error("ERROR reading from socket");
-    
-      switch (*payload_type)
+    while (1)
     {
-    case 0:
-        cout << "video bitstream" << "\n";
-        //video bitstream
-	if (n < 5000000)
-	{
-		fflush(video);
-		fwrite(buffer_payload, sizeof(char), length_loaded, video);
-	} else {
-		fclose(video);
-	} 
-        break;
-    case 1:
-        cout << "codec data" << "\n";
-        //codec data
-        // codec_data codec;
-        // memcpy((char *)&codec, buffer_payload, sizeof(codec));
-        break;
-    case 2:
-        cout << "heartbeat" << "\n";
-        //heartbeat
-        break;
-    default:
-        //cout << "payload_type: " << payload_type << "\n";
-        break;
-    }
+        n = 0;
+        while (n < BUFFER_SIZE)
+        {
+            n += read(sock, buffer + n, BUFFER_SIZE - n);
+            if (n < 0) error("ERROR reading from socket");
+            cout << "n: " << n << "\n";
+        }
 
-        delete[] buffer_payload;
+        header_stream_packets header;
+        memcpy((char *)&header, buffer, sizeof(header));
+
+        unsigned short  payload_type = header.payload_type;
+        unsigned int   payload_size = header.payload_size;
+
+        cout << "payload_size: " << payload_size << "\n";
+        cout << "payload_type: " << payload_type << "\n";
+
+        int length_loaded = 0;
+        while (length_loaded < payload_size)
+        {
+            char *buffer_payload = new char[payload_size]();
+            length_loaded += read(sock, buffer_payload, payload_size - length_loaded);
+
+            cout << "payload_size: " << payload_size << "\n";
+            cout << "loaded: " << length_loaded << "\n";
+
+            if (length_loaded < 0) error("ERROR reading from socket");
+
+            switch (payload_type)
+            {
+            case 0:
+                cout << "video bitstream" << "\n";
+                //video bitstream
+                break;
+            case 1:
+                cout << "codec data" << "\n";
+                //codec data
+                // codec_data codec;
+                // memcpy((char *)&codec, buffer_payload, sizeof(codec));
+                break;
+            case 2:
+                cout << "heartbeat" << "\n";
+                //heartbeat
+                break;
+            default:
+                error("error payload type\n");
+                break;
+            }
+
+            delete[] buffer_payload;
+        }
+    }
 }
 
 
+
+void send_command_to_remote_control(const string &command)
+{
+    int sock_remote = net_search_socket_remote_control();
+
+    if (sock_remote > 0)
+    {
+        string host             =   "starlight.local.";
+        string active_remote    =   "1986535575";
+
+        http_request_t *req     =   http_request_init("HTTP/1.1", "GET", "/ctrl-int/1/" + command);
+        http_request_add_header(req, "Host", host.c_str());
+        http_request_add_header(req, "Active-Remote", active_remote.c_str());
+
+        http_request_finish(req, NULL, strlen(0));
+
+        int datalen;
+        const char *data_res = http_request_get_data(req, &datalen);
+
+        send_to_socket(sock, data_res, datalen);
+        http_request_destroy(req);
+    }
+}
