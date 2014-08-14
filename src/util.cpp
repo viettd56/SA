@@ -16,7 +16,7 @@ void error(const char *msg)
 }
 
 
-string str_nconcat_char(const string &des, const char *src, int n)
+string str_nconcat_char(const string &des, const char *src, const int &n)
 {
     if (src == NULL)
     {
@@ -172,7 +172,7 @@ char *str_strip_brackets(char *str)
 }
 
 
-string convert_method(int m)
+string convert_method(const int &m)
 {
     switch (m)
     {
@@ -200,11 +200,24 @@ string convert_method(int m)
     }
 }
 
-void send_to_socket(int sock, const char *msg, int len_msg)
+void send_to_socket(const int &sock, const char *msg, const int &len_msg)
 {
     int nmsg = write(sock, msg, len_msg);
     if (nmsg < 0) error("ERROR writing to socket");
     std::cout << "MSG: " << msg << "\n";
+}
+
+void send_res_to_socket(const int &sock, http_response_t *res){
+    int datalen;
+    const char *data_res = http_response_get_data(res, &datalen);
+    send_to_socket(sock, data_res, datalen);
+}
+
+void send_req_to_socket(const int &sock, http_request_t *req)
+{
+    int datalen;
+    const char *data_req = http_request_get_data(req, &datalen);
+    send_to_socket(sock, data_req, datalen);
 }
 
 void safe_copy(char *&des, const char *src, const int &len_src, int &size_des, int &len_des)
@@ -257,7 +270,7 @@ char *str_concat(const char *str1, const char *str2)
     return result;
 }
 
-void write_to_file(FILE *fr, char *buffer, const int length)
+void write_to_file(FILE *fr, char *buffer, const int &length)
 {
     /* write data */
     fflush(fr);
@@ -265,7 +278,7 @@ void write_to_file(FILE *fr, char *buffer, const int length)
     fclose(fr);
 }
 
-std::string exec(const char* cmd) {
+string exec(const char* cmd) {
     FILE* pipe = popen(cmd, "r");
     if (!pipe) return "ERROR";
     char buffer[128];
@@ -275,5 +288,26 @@ std::string exec(const char* cmd) {
             result += buffer;
     }
     pclose(pipe);
+    return result;
+}
+
+string read_from_socket(const int &sock){
+
+    int     buffer_size     = 500;
+    int     msg_size        = 500;
+    int     msg_loaded      = 0;
+    char    buffer          = new char[buffer_size]();
+    char    msg             = new char[msg_size]();
+    int     n               = 0;
+    do
+    {
+        n = read(sock, buffer, buffer_size);
+        if (n < 0) error("ERROR reading response from socket");
+        safe_copy(msg, buffer, n, msg_size, msg_loaded);
+    }
+    while (n > 0);
+    string result(msg);
+    delete[] buffer;
+    delete[] msg;
     return result;
 }

@@ -8,61 +8,49 @@
 
 using std::cout;
 
-void send_error_method_not_allowed(http_response_t *res);
-void send_error_not_found(http_response_t *res);
+void send_error_method_not_allowed(const int &sock);
+void send_error_not_found(const int &sock);
 
 void routing_excute(const int &sock, const Request &rq)
 {
-
-
-	http_response_t 	*res 	= 	NULL;
-	// headers_map = get_headers_map();
-	// params_map = get_params_map();
-	string 				method 	= 	rq.get_method();
-	string 				url 	= 	rq.get_url();
-	//cout << "----------method: " << method << "\n" << url << "\n";
-	// char *data = rq.get_data();
-
-	res 						= 	http_response_init("HTTP/1.1", 200, "OK");
-
 	if (!method.compare("GET"))
 	{
 		if (!url.compare("/slideshow-features"))
 		{
 			//A client can fetch the list of available transitions for slideshows.
 			cout << "GET /slideshow-features\n";
-			get_slideshow_features(res);
+			get_slideshow_features(sock);
 		}
 		else if (!url.compare("/server-info"))
 		{
 			// Fetch general informations about the AirPlay server.
 			cout << "GET  /server-info\n";
-			get_server_info(res);
+			get_server_info(sock);
 
 		}
 		else if (!url.compare("/scrub"))
 		{
 			//Retrieve the current playback position.
 			cout << "GET /scrub\n";
-			get_scrub(res);
+			get_scrub(sock);
 		}
 		else if (!url.compare("/playback-info"))
 		{
 			//Retrieve playback informations such as position, duration, rate, buffering status and more.
 			cout << "GET /playback-info\n";
-			get_playback_info(res);
+			get_playback_info(sock);
 		}
 		else if (str_starts_with(url.c_str(), "/getProperty?"))
 		{
 			//Get playback property.
 			cout << "GET /getProperty\n";
-			get_getProperty(url.c_str() + strlen("/getProperty?"), res);
+			get_getProperty(sock, url.c_str() + strlen("/getProperty?"));
 		}
 		else if (!url.compare("/stream.xml"))
 		{
 			//fetch mirroring server informations
 			cout << "GET /stream.xml\n";
-			get_stream(res);
+			get_stream(sock);
 		}
 		else
 		{
@@ -75,37 +63,36 @@ void routing_excute(const int &sock, const Request &rq)
 		{
 			//Stop a photo or slideshow session.
 			cout << "POST /stop\n";
-			post_stop(res);
+			post_stop(sock);
 		}
 		else if (!url.compare("/reverse"))
 		{
 			cout << "POST /reverse\n";
-			post_reverse(rq, res);
+			post_reverse(sock, rq);
 		}
 		else if (!url.compare("/play"))
 		{
 			//Start video playback.
 			cout << "POST /play\n";
-			post_play(rq, res);
+			post_play(sock, rq);
 		}
 		else if (str_starts_with(url.c_str(), "/scrub?"))
 		{
 			//Seek at an arbitrary location in the video.
 			cout << "POST /scrub\n";
-			post_scrub(url.c_str() + strlen("/scrub?"), res);
+			post_scrub(sock, url.c_str() + strlen("/scrub?"));
 		}
 		else if (str_starts_with(url.c_str(), "/rate?"))
 		{
 			//Change the playback rate.
 			cout << "POST /rate\n";
-			post_rate(url.c_str() + strlen("/rate?"), res);
+			post_rate(sock, url.c_str() + strlen("/rate?"));
 		}
 		else if (!url.compare("/stream"))
 		{
 			//Start the live video transmission.
 			cout << "POST /stream\n";
-			post_stream(rq, res, sock);
-			cout << "--------" << res << "\n";
+			post_stream(sock, rq);
 		}
 		else
 		{
@@ -118,61 +105,45 @@ void routing_excute(const int &sock, const Request &rq)
 		{
 			//Send a JPEG picture to the server.
 			cout << "PUT /photo\n";
-			put_photo(rq, res);
+			put_photo(sock, rq);
 		}
 		else if (!url.compare("/slideshows/1"))
 		{
 
 			//Start or stop a slideshow session.
 			cout << "PUT /slideshows/1\n";
-			put_slideshow_session(rq, res);
+			put_slideshow_session(sock, rq);
 		}
 		else if (str_starts_with(url.c_str(), "/setProperty?"))
 		{
 			//Set playback property.
 			cout << "PUT /setProperty\n";
-			put_setProperty(url.c_str() + strlen("/setProperty?"), rq, res);
+			put_setProperty(sock, url.c_str() + strlen("/setProperty?"), rq);
 		}
 		else
 		{
-			send_error_not_found(res);
+			send_error_not_found(sock);
 		}
 	}
 	else
 	{
-		send_error_method_not_allowed(res);
+		send_error_method_not_allowed(sock);
 	}
-
-	if (res != NULL)
-	{
-		int datalen;
-		// http_response_finish(res, NULL, 0);
-		const char *data_res = http_response_get_data(res, &datalen);
-
-		send_to_socket(sock, data_res, datalen);
-		http_response_destroy(res);
-	}
-	//------------------------------------------------
-
-	// http_request_t *req = post_event_video();
-	// int datalen;
-	// const char *data_res = http_request_get_data(req, &datalen);
-
-	// send_to_socket(sock, data_res, datalen);
-	// http_request_destroy(req);
 }
 
 
-void send_error_method_not_allowed(http_response_t *res)
+void send_error_method_not_allowed(const int &sock)
 {
-	http_response_destroy(res);
-	res = http_response_init("HTTP/1.1", 405, "Method Not Allowed");
+	http_response_t *res = http_response_init("HTTP/1.1", 405, "Method Not Allowed");
 	http_response_finish(res, NULL, 0);
+	send_res_to_socket(sock, res);
+    http_response_destroy(res);
 }
 
-void send_error_not_found(http_response_t *res)
+void send_error_not_found(const int &sock)
 {
-	http_response_destroy(res);
-	res = http_response_init("HTTP/1.1", 404, "Not Found");
+	http_response_t *res = http_response_init("HTTP/1.1", 404, "Not Found");
 	http_response_finish(res, NULL, 0);
+	send_res_to_socket(sock, res);
+    http_response_destroy(res);
 }

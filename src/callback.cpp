@@ -20,8 +20,9 @@ state_param state_params  =   KEY;
 string last_key           =   "";
 
 //A client can fetch the list of available transitions for slideshows.
-void get_slideshow_features(http_response_t *res)
+void get_slideshow_features(const int &sock)
 {
+    http_response_t *res    =   http_response_init("HTTP/1.1", 200, "OK");
     http_response_add_header(res, "Content-Type", "text/x-apple-plist+xml");
     string  key          =   "Reflections";
     string  name         =   "Reflections";
@@ -46,11 +47,14 @@ void get_slideshow_features(http_response_t *res)
 
     const char *msg     =   msg_reponse.c_str();
     http_response_finish(res, msg, strlen(msg));
+    send_res_to_socket(sock, res);
+    http_response_destroy(res);
 }
 
 //Send a JPEG picture to the server.
-void put_photo(const Request &rq, http_response_t *res)
+void put_photo(const int &sock, const Request &rq)
 {
+    http_response_t           *res                   =   http_response_init("HTTP/1.1", 200, "OK");
     std::map<string, string>  map                    =   rq.get_headers_map();
     string                    x_apple_assetKey       =   map["X-Apple-AssetKey"];
     string                    x_apple_transition     =   map["X-Apple-Transition"];
@@ -82,10 +86,12 @@ void put_photo(const Request &rq, http_response_t *res)
     }
 
     http_response_finish(res, NULL, 0);
+    send_res_to_socket(sock, res);
+    http_response_destroy(res);
 }
 
 //Start or stop a slideshow session.
-void put_slideshow_session(const Request &rq, http_response_t *res)
+void put_slideshow_session(const int &sock, const Request &rq)
 {
     map<string, boost::any> dict;
     Plist::readPlist(rq.get_data(), rq.get_len_data(), dict);
@@ -99,6 +105,7 @@ void put_slideshow_session(const Request &rq, http_response_t *res)
     cout << "theme = " << theme << "\n";
     cout << "state = " << state << "\n";
 
+    http_response_t *res    =   http_response_init("HTTP/1.1", 200, "OK");
     http_response_add_header(res, "Content-Type", "text/x-apple-plist+xml");
     // cout << params_map["theme"] << "\n";
     string  msg_reponse      =  "";
@@ -110,12 +117,12 @@ void put_slideshow_session(const Request &rq, http_response_t *res)
                                 + "</plist>" + "\n";
     const char *msg          =   msg_reponse.c_str();
     http_response_finish(res, msg, strlen(msg));
-    //cout << "res:" << res << "\n";
-
+    send_res_to_socket(sock, res);
+    http_response_destroy(res);
 }
 
 //notifies a client that a photo session has ended.
-http_request_t *post_event_photo()
+void post_event_photo(const int &sock)
 {
     string x_apple_session_ID   =   "1bd6ceeb-fffd-456c-a09c-996053a7a08c";
     string category             =   "photo";
@@ -141,11 +148,15 @@ http_request_t *post_event_photo()
                                     + "</plist>" + "\n";
     const char *msg             =   msg_request.c_str();
     http_request_finish(req, msg, strlen(msg));
-    return req;
+    send_req_to_socket(sock, req);
+    http_request_destroy(req);
+
+    string res = read_from_socket(sock);
+    cout << res;
 }
 
 // fetch a new picture
-http_request_t *get_slideshow()
+void get_slideshow(const int &sock)
 {
     string id                   =   "1";
     string key                  =   "1";
@@ -158,11 +169,14 @@ http_request_t *get_slideshow()
     http_request_add_header(req, "X-Apple-Session-ID", x_apple_session_ID.c_str());
 
     http_request_finish(req, NULL, 0);
-    return req;
+    send_req_to_socket(sock, req);
+    http_request_destroy(req);
+    string res = read_from_socket(sock);
+    // cout << res;
 }
 
 // Fetch general informations about the AirPlay server.
-void get_server_info(http_response_t *res)
+void get_server_info(const int &sock)
 {
     string deviceid     =   "58:55:CA:1A:E2:88";
     string features     =   "14839";
@@ -170,6 +184,7 @@ void get_server_info(http_response_t *res)
     string protovers    =   "1.0";
     string srcvers      =   "120.2";
 
+    http_response_t *res    =   http_response_init("HTTP/1.1", 200, "OK");
     http_response_add_header(res, "Content-Type", "text/x-apple-plist+xml");
     // cout << params_map["theme"] << "\n";
     string msg_reponse  =   "";
@@ -192,9 +207,12 @@ void get_server_info(http_response_t *res)
                             + "</plist>" + "\n";
     const char *msg     =   msg_reponse.c_str();
     http_response_finish(res, msg, strlen(msg));
+    send_res_to_socket(sock, res);
+    http_response_destroy(res);
 }
-void post_play(const Request &rq, http_response_t *res)
+void post_play(const int &sock, const Request &rq)
 {
+    http_response_t *res    =   http_response_init("HTTP/1.1", 200, "OK");
     //cout << "Content-Type" << rq.get_headers_map()["Content-Type"] << "\n";
     if (rq.get_headers_map()["Content-Type"] == "text/parameters"
             || rq.get_headers_map()["Content-Type"] == "")
@@ -208,11 +226,6 @@ void post_play(const Request &rq, http_response_t *res)
     }
     else if (rq.get_headers_map()["Content-Type"] == "application/x-apple-binary-plist")
     {
-        //cout << "application/x-apple-binary-plist" << "\n";
-        // char *data = rq.get_data();
-        // char *binary_data = strsep(&data, "\r\n\r\n"); // BINARY PLIST DATA
-        // char *xml = data;
-
         params_map.clear();
 
         map<string, boost::any> dict;
@@ -224,38 +237,50 @@ void post_play(const Request &rq, http_response_t *res)
         cout << "Start-Position: " << start_position << "\n";
     }
     http_response_finish(res, NULL, 0);
+    send_res_to_socket(sock, res);
+    http_response_destroy(res);
 }
 
 //Seek at an arbitrary location in the video.
-void post_scrub(const char *argument, http_response_t *res)
+void post_scrub(const int &sock, const char *argument)
 {
+    http_response_t *res    =   http_response_init("HTTP/1.1", 200, "OK");
     params_map.clear();
     //cout << data << "\n";
     attrs_quotes_map_str_parse(params_map, argument);
-    cout << params_map["position"] << "\n"
-         ;    http_response_finish(res, NULL, 0);
+    cout << params_map["position"] << "\n";    
+    http_response_finish(res, NULL, 0);
+    send_res_to_socket(sock, res);
+    http_response_destroy(res);
 }
 
 //Change the playback rate.
-void post_rate(const char *argument, http_response_t *res)
+void post_rate(const int &sock, const char *argument)
 {
+    http_response_t *res    =   http_response_init("HTTP/1.1", 200, "OK");
     params_map.clear();
     //cout << data << "\n";
     attrs_quotes_map_str_parse(params_map, argument);
     cout << params_map["value"] << "\n";
     http_response_finish(res, NULL, 0);
+    send_res_to_socket(sock, res);
+    http_response_destroy(res);
 }
 
 //Stop playback.
-void post_stop(http_response_t *res)
+void post_stop(const int &sock)
 {
+    http_response_t *res    =   http_response_init("HTTP/1.1", 200, "OK");
     //Stop a photo or slideshow session.
     http_response_finish(res, NULL, 0);
+    send_res_to_socket(sock, res);
+    http_response_destroy(res);
 }
 
 //Retrieve the current playback position.
-void get_scrub(http_response_t *res)
+void get_scrub(const int &sock)
 {
+    http_response_t *res    =   http_response_init("HTTP/1.1", 200, "OK");
     http_response_add_header(res, "Content-Type", "text/parameters");
     //add duration here
     string duration     =   doubletostr(15);
@@ -266,12 +291,15 @@ void get_scrub(http_response_t *res)
     cout << msg_reponse << "\n";
     const char *msg     =   msg_reponse.c_str();
     http_response_finish(res, msg, strlen(msg));
+    send_res_to_socket(sock, res);
+    http_response_destroy(res);
 
 }
 
 //Retrieve playback informations such as position, duration, rate, buffering status and more.
-void get_playback_info(http_response_t *res)
+void get_playback_info(const int &sock)
 {
+    http_response_t *res    =   http_response_init("HTTP/1.1", 200, "OK");
     //get playback access log
     string duration                     =   "1801";
     string loadedTimeRanges_duration    =   "51.541130402";
@@ -320,16 +348,15 @@ void get_playback_info(http_response_t *res)
                             + "</plist>" + "\n";
     const char *msg     =   msg_reponse.c_str();
     http_response_finish(res, msg, strlen(msg));
+    send_res_to_socket(sock, res);
+    http_response_destroy(res);
 
 }
 
 //Set playback property.
-void put_setProperty(const char *argument, const Request &rq, http_response_t *res)
+void put_setProperty(const int &sock, const char *argument, const Request &rq)
 {
-    // char *data = rq.get_data();
-    // char *binary_data = strsep(&data, "\r\n\r\n"); // BINARY PLIST DATA
-    // char *xml = data;
-
+    http_response_t *res    =   http_response_init("HTTP/1.1", 200, "OK");
     map<string, boost::any> dict;
     Plist::readPlist(rq.get_data(), rq.get_len_data(), dict);
     const map<string, boost::any> &dictValue = boost::any_cast<const map<string, boost::any>&>(dict.find("value")->second);
@@ -363,12 +390,14 @@ void put_setProperty(const char *argument, const Request &rq, http_response_t *r
     vector<char> msg;
     Plist::writePlistBinary(msg, dictRes);
     http_response_finish(res, reinterpret_cast<char *> (&msg[0]), msg.size());
+    send_res_to_socket(sock, res);
+    http_response_destroy(res);
 }
 
 //Get playback property.
-void get_getProperty(const char *argument, http_response_t *res)
+void get_getProperty(const int &sock, const char *argument)
 {
-
+    http_response_t *res    =   http_response_init("HTTP/1.1", 200, "OK");
     map<string, boost::any> dictRes;
 
     if (!strcmp(argument, "playbackAccessLog"))
@@ -421,10 +450,12 @@ void get_getProperty(const char *argument, http_response_t *res)
     vector<char> msg;
     Plist::writePlistBinary(msg, dictRes);
     http_response_finish(res, reinterpret_cast<char *> (&msg[0]), msg.size());
+    send_res_to_socket(sock, res);
+    http_response_destroy(res);
 }
 
 // notify the server about the playback state.
-http_request_t *post_event_slideshow()
+void post_event_slideshow(const int &sock)
 {
     string x_apple_session_ID   =   "f1634b51-5cae-4384-ade5-54f4159a15f1";
     string category             =   "slideshow";
@@ -453,11 +484,15 @@ http_request_t *post_event_slideshow()
                                     + "</plist>" + "\n";
     const char *msg             =   msg_request.c_str();
     http_request_finish(req, msg, strlen(msg));
-    return req;
+    send_req_to_socket(sock, req);
+    http_request_destroy(req);    
+
+    string res = read_from_socket(sock_remote);
+    cout << res;
 }
 
 //send the playback state to the client.
-http_request_t *post_event_video()
+void post_event_video(const int &sock)
 {
     string x_apple_session_ID   =   "f1634b51-5cae-4384-ade5-54f4159a15f1";
     string category             =   "video";
@@ -483,32 +518,37 @@ http_request_t *post_event_video()
                                     + "</plist>" + "\n";
     const char *msg             =   msg_request.c_str();
     http_request_finish(req, msg, strlen(msg));
-    return req;
+    send_req_to_socket(sock, req);
+    http_request_destroy(req);
+    string res = read_from_socket(sock);
+    cout << res;
 }
 
-void post_reverse(const Request &rq, http_response_t *res)
+void post_reverse(const int &sock, const Request &rq)
 {
     std::map<string, string> map  =   rq.get_headers_map();
     string x_apple_session_ID     =   map["X-Apple-Session-ID"];
     string x_apple_device_ID      =   map["X-Apple-Device-ID"];
     string x_apple_purpose        =   map["X-Apple-Purpose"];
 
-    http_response_destroy(res);
-    res                           =   http_response_init("HTTP/1.1", 101, "Switching Protocols");
+    http_response_t *res    =   http_response_init("HTTP/1.1", 101, "Switching Protocols");
     http_response_add_header(res, "Upgrade", "PTTH/1.0");
     http_response_add_header(res, "Connection", "Upgrade");
     http_response_finish(res, NULL, 0);
+    send_res_to_socket(sock, res);
+    http_response_destroy(res);
 }
 
 //Retrieve information about the server capabilities.
-void get_stream(http_response_t *res)
+void get_stream(const int &sock)
 {
+    http_response_t *res    =   http_response_init("HTTP/1.1", 200, "OK");
+    
     int     height          =   720;
     bool    overscanned     =   true;
     double  refreshRate     =   0.016666666666666666;
     string  version         =   "130.14";
     int     width           =   1280;
-
 
     http_response_add_header(res, "Content-Type", "text/x-apple-plist+xml");
 
@@ -522,10 +562,12 @@ void get_stream(http_response_t *res)
     vector<char> msg;
     Plist::writePlistXML(msg, dictRes);
     http_response_finish(res, reinterpret_cast<char *> (&msg[0]), msg.size());
+    send_res_to_socket(sock, res);
+    http_response_destroy(res);
 }
 
 //The client sends a binary property list with information about the stream
-void post_stream(const Request &rq, http_response_t *&res, const int &sock)
+void post_stream(const int &sock, const Request &rq)
 {
     string deviceID;
     string latencyMs;
@@ -590,45 +632,64 @@ void post_stream(const Request &rq, http_response_t *&res, const int &sock)
     version = boost::any_cast<const string &>(dict.find("version")->second);
     cout << version << "\n";
 
-    http_response_destroy(res);
-    res = NULL;
-
     //read headers stream packets
-    int         n;
-    const int   BUFFER_SIZE             = 128;
-    char        buffer[BUFFER_SIZE];
+    int         n                       = 0;
+    int         length_loaded           = 0;
+    const int   BUFFER_HEADER_SIZE      = 128;
+    char        buffer_header[BUFFER_HEADER_SIZE];
+    int         buffer_payload_size     = 10000;
+    char        *buffer_payload         = new char[buffer_payload_size]();
     int         length_file             = 0;
-    FILE        *video                  = fopen("stream.avi", "ab");
+    //FILE        *video                  = fopen("stream.avi", "ab");
 
     while (1)
     {
         n = 0;
-        while (n < BUFFER_SIZE)
+        length_loaded = 0;
+        while (length_loaded < BUFFER_HEADER_SIZE)
         {
-            n += read(sock, buffer + n, BUFFER_SIZE - n);
-            if (n < 0) error("ERROR reading from socket");
+            n = read(sock, buffer_header + n, BUFFER_HEADER_SIZE - length_loaded);
+            length_loaded += n;
+            if (n < 0) error("ERROR reading header from socket");
+            
+            if (n = 0) {
+                delete[] buffer_payload;
+                return;
+            }
+            
             cout << "n: " << n << "\n";
         }
 
         header_stream_packets header;
-        memcpy((char *)&header, buffer, sizeof(header));
+        memcpy((char *)&header, buffer_header, sizeof(header));
 
         unsigned short  payload_type = header.payload_type;
-        unsigned int   payload_size = header.payload_size;
+        unsigned int    payload_size = header.payload_size;
 
         cout << "payload_size: " << payload_size << "\n";
         cout << "payload_type: " << payload_type << "\n";
 
-        int length_loaded = 0;
+        if (payload_size > buffer_payload_size){
+            buffer_payload_size = payload_size*2;
+            delete[] buffer_payload;
+            buffer_payload = new char[buffer_payload_size]();
+        }
+
+        n = 0;
+        length_loaded = 0;
         while (length_loaded < payload_size)
         {
-            char *buffer_payload = new char[payload_size]();
-            length_loaded += read(sock, buffer_payload, payload_size - length_loaded);
+             n = read(sock, buffer_payload, payload_size - length_loaded);
+             length_loaded += n;
+            if (n < 0) error("ERROR reading payload from socket");
+
+            if (n = 0) {
+                delete[] buffer_payload;
+                return;
+            }
 
             cout << "payload_size: " << payload_size << "\n";
             cout << "loaded: " << length_loaded << "\n";
-
-            if (length_loaded < 0) error("ERROR reading from socket");
 
             switch (payload_type)
             {
@@ -639,8 +700,8 @@ void post_stream(const Request &rq, http_response_t *&res, const int &sock)
             case 1:
                 cout << "codec data" << "\n";
                 //codec data
-                // codec_data codec;
-                // memcpy((char *)&codec, buffer_payload, sizeof(codec));
+                codec_data codec;
+                memcpy((char *)&codec, buffer_payload, sizeof(codec));
                 break;
             case 2:
                 cout << "heartbeat" << "\n";
@@ -649,11 +710,9 @@ void post_stream(const Request &rq, http_response_t *&res, const int &sock)
             default:
                 error("error payload type\n");
                 break;
-            }
-
-            delete[] buffer_payload;
+            }      
         }
-    }
+    }   
 }
 
 
@@ -672,11 +731,10 @@ void send_command_to_remote_control(const string &command)
         http_request_add_header(req, "Active-Remote", active_remote.c_str());
 
         http_request_finish(req, NULL, strlen(0));
-
-        int datalen;
-        const char *data_res = http_request_get_data(req, &datalen);
-
-        send_to_socket(sock, data_res, datalen);
-        http_request_destroy(req);
+        send_res_to_socket(sock, res);
+        http_response_destroy(res);
     }
+
+    string res = read_from_socket(sock_remote);
+    cout << res;
 }
