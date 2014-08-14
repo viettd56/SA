@@ -104,45 +104,45 @@ int headers_complete_cb(http_parser *p)
 int message_complete_cb(http_parser *p)
 {
     cout << "message_complete_cb" << "\n";
-	
-	Request rq;
-	rq.set_headers_map(headers_map_parsed);
-	rq.set_params_map(params_map_parsed);
-	rq.set_url(url);
-	rq.set_method(convert_method(p->method));
-    cout << "-----method:" << rq.get_method() << "\n";
-	rq.set_data(data, data_len);
-	//cout << "URL: " << url << "\nBody: " <<  data << "\n";
-	rq.set_len_data(data_len);
-	if (data != NULL)
-	{
-		delete[] data;
-		data = NULL;
-	}
 
-	routing_excute(sock, rq);
+    Request rq;
+    rq.set_headers_map(headers_map_parsed);
+    rq.set_params_map(params_map_parsed);
+    rq.set_url(url);
+    rq.set_method(convert_method(p->method));
+    cout << "-----method:" << rq.get_method() << "\n";
+    rq.set_data(data, data_len);
+    //cout << "URL: " << url << "\nBody: " <<  data << "\n";
+    rq.set_len_data(data_len);
+    if (data != NULL)
+    {
+        delete[] data;
+        data = NULL;
+    }
+
+    routing_excute(sock, rq);
     request_parser_init(sock);
-    
-	return 0;
+
+    return 0;
 }
 
 void request_parser_init(const int &sk)
 {
 
-    settings.on_header_field		=	header_field_cb;
-    settings.on_header_value		=	header_value_cb;
-    settings.on_url					=	request_url_cb;
-    settings.on_body				=	body_cb;
-    settings.on_headers_complete	=	headers_complete_cb;
-    settings.on_message_complete	=	message_complete_cb;
+    settings.on_header_field        =   header_field_cb;
+    settings.on_header_value        =   header_value_cb;
+    settings.on_url                 =   request_url_cb;
+    settings.on_body                =   body_cb;
+    settings.on_headers_complete    =   headers_complete_cb;
+    settings.on_message_complete    =   message_complete_cb;
 
-    last_state						=	FIELD;
-    last_header_field				=	"";
-    last_header_value				=	"";
-    url								=	"";
-	sock							=	sk;
-    data_len						=	0;
-    data_size						=	0;
+    last_state                      =   FIELD;
+    last_header_field               =   "";
+    last_header_value               =   "";
+    url                             =   "";
+    sock                            =   sk;
+    data_len                        =   0;
+    data_size                       =   0;
 
     if (data != NULL)
     {
@@ -156,7 +156,7 @@ void request_parser_init(const int &sk)
 void request_parser_excute(http_parser *parser, char *buf, int n)
 {
     int nparsed = http_parser_execute(parser, &settings, buf, n);
-	cout << "HTTP: " << buf << "\n";
+    cout << "HTTP: " << buf << "\n";
     cout << "nparsed: " << nparsed << "\nn:" << n << "\n";
     if (nparsed != n)
     {

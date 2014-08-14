@@ -207,7 +207,8 @@ void send_to_socket(const int &sock, const char *msg, const int &len_msg)
     std::cout << "MSG: " << msg << "\n";
 }
 
-void send_res_to_socket(const int &sock, http_response_t *res){
+void send_res_to_socket(const int &sock, http_response_t *res)
+{
     int datalen;
     const char *data_res = http_response_get_data(res, &datalen);
     send_to_socket(sock, data_res, datalen);
@@ -278,26 +279,29 @@ void write_to_file(FILE *fr, char *buffer, const int &length)
     fclose(fr);
 }
 
-string exec(const char* cmd) {
-    FILE* pipe = popen(cmd, "r");
+string exec(const char *cmd)
+{
+    FILE *pipe = popen(cmd, "r");
     if (!pipe) return "ERROR";
     char buffer[128];
     std::string result = "";
-    while(!feof(pipe)) {
-        if(fgets(buffer, 128, pipe) != NULL)
+    while (!feof(pipe))
+    {
+        if (fgets(buffer, 128, pipe) != NULL)
             result += buffer;
     }
     pclose(pipe);
     return result;
 }
 
-string read_from_socket(const int &sock){
+string read_from_socket(const int &sock)
+{
 
     int     buffer_size     = 500;
     int     msg_size        = 500;
     int     msg_loaded      = 0;
-    char    buffer          = new char[buffer_size]();
-    char    msg             = new char[msg_size]();
+    char    *buffer          = new char[buffer_size]();
+    char    *msg             = new char[msg_size]();
     int     n               = 0;
     do
     {

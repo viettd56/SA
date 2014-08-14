@@ -20,8 +20,8 @@ int main(int argc, char *argv[])
 
     clilen      =   sizeof(cli_addr);
     sockfd      =   net_bind_socket_airplay();
-    newsockfd   =   accept(sockfd,(struct sockaddr *) &cli_addr, &clilen);
-    
+    newsockfd   =   accept(sockfd, (struct sockaddr *) &cli_addr, &clilen);
+
     if (newsockfd < 0)
         error("ERROR on accept");
 

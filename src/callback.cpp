@@ -10,6 +10,7 @@
 #include <boost/any.hpp>
 #include <netinet/in.h>
 #include "Plist.hpp"
+#include "net.hpp"
 
 using std::cout;
 using std::vector;
@@ -248,7 +249,7 @@ void post_scrub(const int &sock, const char *argument)
     params_map.clear();
     //cout << data << "\n";
     attrs_quotes_map_str_parse(params_map, argument);
-    cout << params_map["position"] << "\n";    
+    cout << params_map["position"] << "\n";
     http_response_finish(res, NULL, 0);
     send_res_to_socket(sock, res);
     http_response_destroy(res);
@@ -485,9 +486,9 @@ void post_event_slideshow(const int &sock)
     const char *msg             =   msg_request.c_str();
     http_request_finish(req, msg, strlen(msg));
     send_req_to_socket(sock, req);
-    http_request_destroy(req);    
+    http_request_destroy(req);
 
-    string res = read_from_socket(sock_remote);
+    string res = read_from_socket(sock);
     cout << res;
 }
 
@@ -543,7 +544,7 @@ void post_reverse(const int &sock, const Request &rq)
 void get_stream(const int &sock)
 {
     http_response_t *res    =   http_response_init("HTTP/1.1", 200, "OK");
-    
+
     int     height          =   720;
     bool    overscanned     =   true;
     double  refreshRate     =   0.016666666666666666;
@@ -651,12 +652,13 @@ void post_stream(const int &sock, const Request &rq)
             n = read(sock, buffer_header + n, BUFFER_HEADER_SIZE - length_loaded);
             length_loaded += n;
             if (n < 0) error("ERROR reading header from socket");
-            
-            if (n = 0) {
+
+            if (n = 0)
+            {
                 delete[] buffer_payload;
                 return;
             }
-            
+
             cout << "n: " << n << "\n";
         }
 
@@ -669,8 +671,9 @@ void post_stream(const int &sock, const Request &rq)
         cout << "payload_size: " << payload_size << "\n";
         cout << "payload_type: " << payload_type << "\n";
 
-        if (payload_size > buffer_payload_size){
-            buffer_payload_size = payload_size*2;
+        if (payload_size > buffer_payload_size)
+        {
+            buffer_payload_size = payload_size * 2;
             delete[] buffer_payload;
             buffer_payload = new char[buffer_payload_size]();
         }
@@ -679,11 +682,12 @@ void post_stream(const int &sock, const Request &rq)
         length_loaded = 0;
         while (length_loaded < payload_size)
         {
-             n = read(sock, buffer_payload, payload_size - length_loaded);
-             length_loaded += n;
+            n = read(sock, buffer_payload, payload_size - length_loaded);
+            length_loaded += n;
             if (n < 0) error("ERROR reading payload from socket");
 
-            if (n = 0) {
+            if (n = 0)
+            {
                 delete[] buffer_payload;
                 return;
             }
@@ -710,9 +714,9 @@ void post_stream(const int &sock, const Request &rq)
             default:
                 error("error payload type\n");
                 break;
-            }      
+            }
         }
-    }   
+    }
 }
 
 
@@ -725,14 +729,16 @@ void send_command_to_remote_control(const string &command)
     {
         string host             =   "starlight.local.";
         string active_remote    =   "1986535575";
+        string url              =   "";
+        url                     =   url + "/ctrl-int/1/" + command;
 
-        http_request_t *req     =   http_request_init("HTTP/1.1", "GET", "/ctrl-int/1/" + command);
+        http_request_t *req     =   http_request_init("HTTP/1.1", "GET", url.c_str());
         http_request_add_header(req, "Host", host.c_str());
         http_request_add_header(req, "Active-Remote", active_remote.c_str());
 
-        http_request_finish(req, NULL, strlen(0));
-        send_res_to_socket(sock, res);
-        http_response_destroy(res);
+        http_request_finish(req, NULL, 0);
+        send_req_to_socket(sock_remote, req);
+        http_request_destroy(req);
     }
 
     string res = read_from_socket(sock_remote);

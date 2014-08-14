@@ -28,7 +28,7 @@ void Http_request_parse::http_request_parse_excute()
     {
         http_parser parser;
         http_parser_init(&parser, HTTP_REQUEST);
-        
+
         request_parser_init(sock);
         int n, nparsed;
         while (n = read(sock, buffer, BUFFER_SIZE))
@@ -37,7 +37,7 @@ void Http_request_parse::http_request_parse_excute()
             //std::cout << "-----------data: " << buffer << "\n";
             request_parser_excute(&parser, buffer, n);
         }
-    
+
     }
 }
 
