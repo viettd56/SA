@@ -211,6 +211,7 @@ void send_res_to_socket(const int &sock, http_response_t *res)
 {
     int datalen;
     const char *data_res = http_response_get_data(res, &datalen);
+    cout << "data_res: " << data_res << "\n";
     send_to_socket(sock, data_res, datalen);
 }
 
@@ -218,6 +219,7 @@ void send_req_to_socket(const int &sock, http_request_t *req)
 {
     int datalen;
     const char *data_req = http_request_get_data(req, &datalen);
+    cout << "data_req: " << data_req << "\n";
     send_to_socket(sock, data_req, datalen);
 }
 

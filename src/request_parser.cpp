@@ -37,7 +37,7 @@ int message_complete_cb(http_parser *p);
 int request_url_cb(http_parser *p, const char *buf, size_t len)
 {
     url = str_nconcat_char(url, buf, len);
-    cout << "------------------------url:" << url << "\n";
+    // cout << "------------------------url:" << url << "\n";
     return 0;
 }
 
@@ -74,7 +74,7 @@ int header_value_cb(http_parser *p, const char *buf, size_t len)
 int body_cb(http_parser *p, const char *buf, size_t len)
 {
 
-    cout << "---------Body----------\n" << buf << "\n";
+    // cout << "---------Body----------\n" << buf << "\n";
 
     if (data_len + len <= data_size)
     {
@@ -92,7 +92,7 @@ int body_cb(http_parser *p, const char *buf, size_t len)
 
 int headers_complete_cb(http_parser *p)
 {
-    cout << "on_headers_complete" << "\n";
+    // cout << "on_headers_complete" << "\n";
     data_size   =   atoi(headers_map_parsed["Content-Length"].c_str());
     //cout << "--------------------" << data_size << "------------------------\n";
     data        =   new char[data_size]();
@@ -103,14 +103,14 @@ int headers_complete_cb(http_parser *p)
 
 int message_complete_cb(http_parser *p)
 {
-    cout << "message_complete_cb" << "\n";
+    // cout << "message_complete_cb" << "\n";
 
     Request rq;
     rq.set_headers_map(headers_map_parsed);
     rq.set_params_map(params_map_parsed);
     rq.set_url(url);
     rq.set_method(convert_method(p->method));
-    cout << "-----method:" << rq.get_method() << "\n";
+    // cout << "-----method:" << rq.get_method() << "\n";
     rq.set_data(data, data_len);
     //cout << "URL: " << url << "\nBody: " <<  data << "\n";
     rq.set_len_data(data_len);
@@ -156,7 +156,7 @@ void request_parser_init(const int &sk)
 void request_parser_excute(http_parser *parser, char *buf, int n)
 {
     int nparsed = http_parser_execute(parser, &settings, buf, n);
-    cout << "HTTP: " << buf << "\n";
+    // cout << "HTTP: " << buf << "\n";
     cout << "nparsed: " << nparsed << "\nn:" << n << "\n";
     if (nparsed != n)
     {

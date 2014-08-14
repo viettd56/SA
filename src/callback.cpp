@@ -214,18 +214,9 @@ void get_server_info(const int &sock)
 void post_play(const int &sock, const Request &rq)
 {
     http_response_t *res    =   http_response_init("HTTP/1.1", 200, "OK");
-    //cout << "Content-Type" << rq.get_headers_map()["Content-Type"] << "\n";
-    if (rq.get_headers_map()["Content-Type"] == "text/parameters"
-            || rq.get_headers_map()["Content-Type"] == "")
-    {
-        //cout << "text/parameters" << "\n";
-        //cout << "data:" << rq.get_data() << "\n";
-        params_map.clear();
-        msgs_map_str_parse(params_map, rq.get_data());
-        cout << "Content-Location: " << params_map["Content-Location"] << "\n";
-        cout << "Start-Position: " << params_map["Start-Position"] << "\n";
-    }
-    else if (rq.get_headers_map()["Content-Type"] == "application/x-apple-binary-plist")
+    cout << "Content-Type: " << rq.get_headers_map()["Content-Type"] << "\n";
+
+    if (rq.get_headers_map()["Content-Type"] == "application/x-apple-binary-plist")
     {
         params_map.clear();
 
@@ -237,6 +228,16 @@ void post_play(const int &sock, const Request &rq)
         cout << "Content-Location: " << content_location << "\n";
         cout << "Start-Position: " << start_position << "\n";
     }
+    else
+    {
+        //cout << "text/parameters" << "\n";
+        //cout << "data:" << rq.get_data() << "\n";
+        params_map.clear();
+        msgs_map_str_parse(params_map, rq.get_data());
+        cout << "Content-Location: " << params_map["Content-Location"] << "\n";
+        cout << "Start-Position: " << params_map["Start-Position"] << "\n";
+    }
+
     http_response_finish(res, NULL, 0);
     send_res_to_socket(sock, res);
     http_response_destroy(res);
