@@ -34,6 +34,7 @@ string str_nconcat_char(const string &des, const char *src, const int &n)
 
     string str_src(src_2);
     delete[] src_2;
+    log("delete src_2");
 
     return des + str_src;
 }
@@ -238,6 +239,7 @@ void safe_copy(char *&des, const char *src, const int &len_src, int &size_des, i
         memcpy(temp + len_des, src, len_src);
 
         delete[] des;
+        log("delete des");
         des = temp;
         std::cout << "temp: " << des << "\n";
         len_des += len_src;
@@ -273,7 +275,7 @@ char *str_concat(const char *str1, const char *str2)
     return result;
 }
 
-void write_to_file(FILE *fr, char *buffer, const int &length)
+void write_to_file(FILE *fr, const char *buffer, const int &length)
 {
     /* write data */
     fflush(fr);
@@ -302,8 +304,8 @@ string read_from_socket(const int &sock)
     int     buffer_size     = 500;
     int     msg_size        = 500;
     int     msg_loaded      = 0;
-    char    *buffer          = new char[buffer_size]();
-    char    *msg             = new char[msg_size]();
+    char    *buffer         = new char[buffer_size]();
+    char    *msg            = new char[msg_size]();
     int     n               = 0;
     do
     {
@@ -314,6 +316,14 @@ string read_from_socket(const int &sock)
     while (n > 0);
     string result(msg);
     delete[] buffer;
+    log("delete buffer");
     delete[] msg;
+    log("delete msg");
     return result;
+}
+
+void log(string msg){
+    msg += "\n";
+    FILE *fr = fopen("log.txt", "ab");
+    write_to_file(fr, msg.c_str(), msg.length());
 }

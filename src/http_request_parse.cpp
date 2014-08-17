@@ -30,7 +30,7 @@ void Http_request_parse::http_request_parse_excute()
         http_parser_init(&parser, HTTP_REQUEST);
 
         request_parser_init(sock);
-        int n, nparsed;
+        int n;
         while (n = read(sock, buffer, BUFFER_SIZE))
         {
             if (n < 0) error("ERROR reading from socket");

@@ -16,7 +16,7 @@ const int port_screen_mirror    =   7100;
 
 int net_bind_socket(int port)
 {
-    int sockfd, newsockfd, pid;
+    int sockfd;
     struct sockaddr_in serv_addr;
 
     /* server */
@@ -60,7 +60,7 @@ int net_search_socket_remote_control()
     std::cout << map["address"] << "\n" << map["port"] << "\n";
     if ((map["address"] != "") && (map["port"] != ""))
     {
-        int     sockfd, portno, n;
+        int     sockfd, portno;
         struct  sockaddr_in serv_addr;
         struct  hostent *server;
 

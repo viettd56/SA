@@ -580,8 +580,8 @@ void post_stream(const int &sock, const Request &rq)
     string version;
     vector<string> timestampInfo;
 
-    FILE *fr = fopen("stream.plist", "wb");
-    write_to_file(fr, rq.get_data(), rq.get_len_data());
+    // FILE *fr = fopen("stream.plist", "wb");
+    // write_to_file(fr, rq.get_data(), rq.get_len_data());
 
     map<string, boost::any> dict;
     Plist::readPlist(rq.get_data(), rq.get_len_data(), dict);
@@ -596,7 +596,7 @@ void post_stream(const int &sock, const Request &rq)
     //FpsInfo
     cout << "FpsInfo: " << "\n";
     const vector<boost::any> &arrayFpsInfo = boost::any_cast<const vector<boost::any>&>(dict.find("fpsInfo")->second);
-    for (int i = 0; i < arrayFpsInfo.size(); i++)
+    for (unsigned int i = 0; i < arrayFpsInfo.size(); i++)
     {
         fpsInfo.push_back(boost::any_cast<const string &>(arrayFpsInfo[i]));
         cout << fpsInfo[i];
@@ -622,7 +622,7 @@ void post_stream(const int &sock, const Request &rq)
     //timestampInfo
     cout << "timestampInfo: " << "\n";
     const vector<boost::any> &arrayTimestampInfo = boost::any_cast<const vector<boost::any>&>(dict.find("timestampInfo")->second);
-    for (int i = 0; i < arrayTimestampInfo.size(); i++)
+    for (unsigned int i = 0; i < arrayTimestampInfo.size(); i++)
     {
         timestampInfo.push_back(boost::any_cast<const string &>(arrayTimestampInfo[i]));
         cout << timestampInfo[i];
@@ -635,13 +635,13 @@ void post_stream(const int &sock, const Request &rq)
     cout << version << "\n";
 
     //read headers stream packets
-    int         n                       = 0;
-    int         length_loaded           = 0;
-    const int   BUFFER_HEADER_SIZE      = 128;
-    char        buffer_header[BUFFER_HEADER_SIZE];
-    int         buffer_payload_size     = 150000;
-    char        *buffer_payload         = new char[buffer_payload_size]();
-    int         length_file             = 0;
+    int             n                       = 0;
+    unsigned int    length_loaded           = 0;
+    const int       BUFFER_HEADER_SIZE      = 128;
+    char            buffer_header[BUFFER_HEADER_SIZE];
+    unsigned int    buffer_payload_size     = 150000;
+    char            *buffer_payload         = new char[buffer_payload_size]();
+    // int             length_file             = 0;
     //FILE        *video                  = fopen("stream.avi", "ab");
 
     while (1)
@@ -670,6 +670,7 @@ void post_stream(const int &sock, const Request &rq)
         {
             buffer_payload_size = payload_size * 2;
             delete[] buffer_payload;
+            log("delete buffer_payload");
             buffer_payload = new char[buffer_payload_size]();
         }
 

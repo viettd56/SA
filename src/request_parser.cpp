@@ -8,13 +8,13 @@
 
 using std::cout;
 
-string  last_header_field       =   "";
-string  last_header_value       =   "";
-string  url                     =   "";
-int     sock                    =   0;
-char    *data                   =   NULL;
-int     data_len                =   0;
-int     data_size               =   0;
+string          last_header_field       =   "";
+string          last_header_value       =   "";
+string          url                     =   "";
+int             sock                    =   0;
+char            *data                   =   NULL;
+unsigned int    data_len                =   0;
+unsigned int    data_size               =   0;
 
 enum state {FIELD, VALUE};
 state last_state;
@@ -117,6 +117,7 @@ int message_complete_cb(http_parser *p)
     if (data != NULL)
     {
         delete[] data;
+        log("delete request_parser data 120");
         data = NULL;
     }
 
@@ -147,6 +148,7 @@ void request_parser_init(const int &sk)
     if (data != NULL)
     {
         delete[] data;
+        log("delete request_parser data 149");
         data = NULL;
     }
 

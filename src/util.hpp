@@ -24,7 +24,8 @@ string 	read_from_socket(const int &sock);
 void 	safe_copy(char *&des, const char *src, const int &len_src, int &size_des, int &len_des);
 string 	doubletostr(const double &t);
 char* 	str_concat(const char *str1, const char *str2);
-void 	write_to_file(FILE *fr, char *buffer, const int &length);
+void 	write_to_file(FILE *fr,const char *buffer, const int &length);
 string 	exec(const char* cmd);
+void 	log(string msg);
 
 #endif

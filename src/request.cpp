@@ -1,4 +1,5 @@
 #include "request.hpp"
+#include "util.hpp"
 #include <cstring>
 
 Request::Request()
@@ -15,6 +16,7 @@ Request::~Request()
     if (data != NULL)
     {
         delete[] data;
+        log("delete data request");
     }
 }
 
