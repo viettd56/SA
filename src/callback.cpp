@@ -639,7 +639,7 @@ void post_stream(const int &sock, const Request &rq)
     int         length_loaded           = 0;
     const int   BUFFER_HEADER_SIZE      = 128;
     char        buffer_header[BUFFER_HEADER_SIZE];
-    int         buffer_payload_size     = 10000;
+    int         buffer_payload_size     = 150000;
     char        *buffer_payload         = new char[buffer_payload_size]();
     int         length_file             = 0;
     //FILE        *video                  = fopen("stream.avi", "ab");
@@ -654,13 +654,7 @@ void post_stream(const int &sock, const Request &rq)
             length_loaded += n;
             if (n < 0) error("ERROR reading header from socket");
 
-            if (n = 0)
-            {
-                delete[] buffer_payload;
-                return;
-            }
-
-            cout << "n: " << n << "\n";
+            cout << "n: " << n << "\n" << "buffer_payload_size: " << buffer_payload_size << "\n";
         }
 
         header_stream_packets header;
@@ -686,12 +680,6 @@ void post_stream(const int &sock, const Request &rq)
             n = read(sock, buffer_payload, payload_size - length_loaded);
             length_loaded += n;
             if (n < 0) error("ERROR reading payload from socket");
-
-            if (n = 0)
-            {
-                delete[] buffer_payload;
-                return;
-            }
 
             cout << "payload_size: " << payload_size << "\n";
             cout << "loaded: " << length_loaded << "\n";
