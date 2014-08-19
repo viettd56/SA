@@ -16,6 +16,7 @@ Request::~Request()
     if (data != NULL)
     {
         delete[] data;
+        data = NULL;
         log("delete data request");
     }
 }

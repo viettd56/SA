@@ -27,5 +27,6 @@ char* 	str_concat(const char *str1, const char *str2);
 void 	write_to_file(FILE *fr,const char *buffer, const int &length);
 string 	exec(const char* cmd);
 void 	log(string msg);
+void 	nprintln(const char *chr, const int length);
 
 #endif

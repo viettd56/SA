@@ -86,7 +86,7 @@ int body_cb(http_parser *p, const char *buf, size_t len)
     // cout << "size:" << data_size << "\n" << "len:" << data_len << "\n" << len << "\n";
     // cout << "size2:" << data_size2 << "\n" << "len2:" << data_len2 << "\n" << len << "\n";
 
-    //cout << "data:" << data << "\n";
+    cout << "data:" << data << "\n";
     return 0;
 }
 
@@ -103,7 +103,7 @@ int headers_complete_cb(http_parser *p)
 
 int message_complete_cb(http_parser *p)
 {
-    // cout << "message_complete_cb" << "\n";
+    cout << "message_complete_cb" << "\n";
 
     Request rq;
     rq.set_headers_map(headers_map_parsed);
@@ -120,10 +120,8 @@ int message_complete_cb(http_parser *p)
         log("delete request_parser data 120");
         data = NULL;
     }
-
     routing_excute(sock, rq);
     request_parser_init(sock);
-
     return 0;
 }
 
@@ -157,9 +155,10 @@ void request_parser_init(const int &sk)
 }
 void request_parser_excute(http_parser *parser, char *buf, int n)
 {
+    // cout << "HTTP: ";
+    // nprintln(buf, n);
     int nparsed = http_parser_execute(parser, &settings, buf, n);
-    // cout << "HTTP: " << buf << "\n";
-    cout << "nparsed: " << nparsed << "\nn:" << n << "\n";
+    // cout << "nparsed: " << nparsed << "\nn:" << n << "\n";
     if (nparsed != n)
     {
         error("http parser error");

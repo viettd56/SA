@@ -16,7 +16,7 @@ int main(int argc, char *argv[])
     int         sockfd, newsockfd;
     socklen_t   clilen;
     struct      sockaddr_in cli_addr;
-    log("-------------------------");
+    log("------------server_mirror-------------");
 
     clilen      =   sizeof(cli_addr);
     sockfd      =   net_bind_socket_screen_mirror();

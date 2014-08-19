@@ -28,15 +28,11 @@ string str_nconcat_char(const string &des, const char *src, const int &n)
         return des;
     }
 
-    char *src_2 = new char[n + 1]();
-    memcpy (src_2, src, n);
-    *(src_2 + n + 1) = 0;
+    char src_2[n + 1];
+    memcpy (&src_2, src, n);
+    src_2[n] = 0;
 
-    string str_src(src_2);
-    delete[] src_2;
-    log("delete src_2");
-
-    return des + str_src;
+    return des + src_2;
 }
 
 void attrs_quotes_map_str_parse(std::map<string, string> &map, const char *str)
@@ -205,14 +201,15 @@ void send_to_socket(const int &sock, const char *msg, const int &len_msg)
 {
     int nmsg = write(sock, msg, len_msg);
     if (nmsg < 0) error("ERROR writing to socket");
-    std::cout << "MSG: " << msg << "\n";
+    // std::cout << "MSG: " << msg << "\n";
 }
 
 void send_res_to_socket(const int &sock, http_response_t *res)
 {
     int datalen;
     const char *data_res = http_response_get_data(res, &datalen);
-    cout << "data_res: " << data_res << "\n";
+    cout << "data_res: ";
+    nprintln(data_res, datalen);
     send_to_socket(sock, data_res, datalen);
 }
 
@@ -220,7 +217,8 @@ void send_req_to_socket(const int &sock, http_request_t *req)
 {
     int datalen;
     const char *data_req = http_request_get_data(req, &datalen);
-    cout << "data_req: " << data_req << "\n";
+    cout << "data_req: ";
+    nprintln(data_req, datalen);
     send_to_socket(sock, data_req, datalen);
 }
 
@@ -310,20 +308,37 @@ string read_from_socket(const int &sock)
     do
     {
         n = read(sock, buffer, buffer_size);
+        cout << n << "\n";
         if (n < 0) error("ERROR reading response from socket");
         safe_copy(msg, buffer, n, msg_size, msg_loaded);
     }
     while (n > 0);
     string result(msg);
-    delete[] buffer;
+    if (buffer != NULL)
+    {
+        delete[] buffer;
+        buffer = NULL;
+    }
     log("delete buffer");
-    delete[] msg;
+    if (msg != NULL)
+    {
+        delete[] msg;
+        msg = NULL;
+    }
     log("delete msg");
     return result;
 }
 
-void log(string msg){
+void log(string msg)
+{
     msg += "\n";
     FILE *fr = fopen("log.txt", "ab");
     write_to_file(fr, msg.c_str(), msg.length());
+}
+
+void nprintln(const char *chr, const int length)
+{
+    char temp[length + 1];
+    memcpy(&temp, chr, length);
+    cout << temp << "\n";
 }

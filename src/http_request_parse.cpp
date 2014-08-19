@@ -7,7 +7,7 @@
 #include "callback.hpp"
 #include "routing.hpp"
 
-const int BUFFER_SIZE = 80;
+const int BUFFER_SIZE = 128;
 char buffer[BUFFER_SIZE];
 
 using std::cout;
@@ -24,20 +24,20 @@ Http_request_parse::~Http_request_parse()
 
 void Http_request_parse::http_request_parse_excute()
 {
+    http_parser parser;
+    http_parser_init(&parser, HTTP_REQUEST);
+    request_parser_init(sock);
+
     while (1)
     {
-        http_parser parser;
-        http_parser_init(&parser, HTTP_REQUEST);
-
-        request_parser_init(sock);
         int n;
-        while (n = read(sock, buffer, BUFFER_SIZE))
-        {
-            if (n < 0) error("ERROR reading from socket");
-            //std::cout << "-----------data: " << buffer << "\n";
-            request_parser_excute(&parser, buffer, n);
-        }
-
+        n = read(sock, buffer, BUFFER_SIZE);
+        if (n < 0) error("ERROR reading from socket");
+        // cout << "n = " << n << "\n";
+        if (n == 0) break;
+        // nprintln(buffer, n);
+        request_parser_excute(&parser, buffer, n);
+        //std::cout << "-----------data: " << buffer << "\n";
     }
 }
 
