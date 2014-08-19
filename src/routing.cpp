@@ -17,6 +17,10 @@ void routing_excute(const int &sock, const Request &rq)
 	const string method 	= rq.get_method();
 	const string url		= rq.get_url();
 
+    // cout << method << "\n" << url << "\n";
+
+    if (method == "Undefined") return; // response
+
     if (!method.compare("GET"))
     {
         if (!url.compare("/slideshow-features"))

@@ -121,6 +121,7 @@ int message_complete_cb(http_parser *p)
         data = NULL;
     }
     routing_excute(sock, rq);
+    http_parser_init(p, HTTP_BOTH);
     request_parser_init(sock);
     return 0;
 }
@@ -158,7 +159,7 @@ void request_parser_excute(http_parser *parser, char *buf, int n)
     // cout << "HTTP: ";
     // nprintln(buf, n);
     int nparsed = http_parser_execute(parser, &settings, buf, n);
-    // cout << "nparsed: " << nparsed << "\nn:" << n << "\n";
+    cout << "nparsed: " << nparsed << "\nn:" << n << "\n";
     if (nparsed != n)
     {
         error("http parser error");

@@ -1,8 +1,8 @@
 CC=g++
 CFLAGS=-c -Wall
 LDFLAGS=
-SOURCES_SERVER=http_parser.c http_request_parse.cpp net.cpp http_request.c request_parser.cpp util.cpp request.cpp http_response.c callback.cpp pugixml.cpp base64.hpp Plist.cpp PlistDate.cpp pugiconfig.hpp routing.cpp structs.h server_airplay.cpp
-SOURCES_SERVER_SCREEN_MIRROR=http_parser.c http_request_parse.cpp net.cpp http_request.c request_parser.cpp util.cpp request.cpp http_response.c callback.cpp pugixml.cpp base64.hpp Plist.cpp PlistDate.cpp pugiconfig.hpp routing.cpp structs.h server_screen_mirroring.cpp 
+SOURCES_SERVER=http_parser.cpp http_request_parse.cpp net.cpp http_request.cpp request_parser.cpp util.cpp request.cpp http_response.cpp callback.cpp pugixml.cpp Plist.cpp PlistDate.cpp  routing.cpp server_airplay.cpp
+SOURCES_SERVER_SCREEN_MIRROR=http_parser.cpp http_request_parse.cpp net.cpp http_request.cpp request_parser.cpp util.cpp request.cpp http_response.cpp callback.cpp pugixml.cpp Plist.cpp PlistDate.cpp routing.cpp server_screen_mirroring.cpp 
 INCLUDES=-I../include 
 OBJECTS_SERVER=$(SOURCES_SERVER:.cpp=.o)
 OBJECTS_SERVER_SCREEN_MIRROR=$(SOURCES_SERVER_SCREEN_MIRROR:.cpp=.o)

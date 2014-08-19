@@ -6,6 +6,7 @@
 #include <unistd.h>
 #include <iostream>
 #include <sstream>
+#include "http_request_parse.hpp"
 
 using std::cout;
 
@@ -296,37 +297,11 @@ string exec(const char *cmd)
     return result;
 }
 
-string read_from_socket(const int &sock)
+void http_parse_from_socket(const int &sock)
 {
 
-    int     buffer_size     = 500;
-    int     msg_size        = 500;
-    int     msg_loaded      = 0;
-    char    *buffer         = new char[buffer_size]();
-    char    *msg            = new char[msg_size]();
-    int     n               = 0;
-    do
-    {
-        n = read(sock, buffer, buffer_size);
-        cout << n << "\n";
-        if (n < 0) error("ERROR reading response from socket");
-        safe_copy(msg, buffer, n, msg_size, msg_loaded);
-    }
-    while (n > 0);
-    string result(msg);
-    if (buffer != NULL)
-    {
-        delete[] buffer;
-        buffer = NULL;
-    }
-    log("delete buffer");
-    if (msg != NULL)
-    {
-        delete[] msg;
-        msg = NULL;
-    }
-    log("delete msg");
-    return result;
+    Http_request_parse request(sock);
+    request.http_request_parse_excute();
 }
 
 void log(string msg)

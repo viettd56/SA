@@ -20,7 +20,7 @@ string 	convert_method(const int &m);
 void 	send_to_socket(const int &sock,const char *msg, const int &len_msg);
 void	send_res_to_socket(const int &sock, http_response_t *res);
 void	send_req_to_socket(const int &sock, http_request_t *req);
-string 	read_from_socket(const int &sock);
+void 	http_parse_from_socket(const int &sock);
 void 	safe_copy(char *&des, const char *src, const int &len_src, int &size_des, int &len_des);
 string 	doubletostr(const double &t);
 char* 	str_concat(const char *str1, const char *str2);

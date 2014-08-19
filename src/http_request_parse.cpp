@@ -25,7 +25,7 @@ Http_request_parse::~Http_request_parse()
 void Http_request_parse::http_request_parse_excute()
 {
     http_parser parser;
-    http_parser_init(&parser, HTTP_REQUEST);
+    http_parser_init(&parser, HTTP_BOTH);
     request_parser_init(sock);
 
     while (1)

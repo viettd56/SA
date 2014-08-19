@@ -152,8 +152,7 @@ void post_event_photo(const int &sock)
     send_req_to_socket(sock, req);
     http_request_destroy(req);
 
-    string res = read_from_socket(sock);
-    cout << res;
+   http_parse_from_socket(sock);
 }
 
 // fetch a new picture
@@ -172,8 +171,7 @@ void get_slideshow(const int &sock)
     http_request_finish(req, NULL, 0);
     send_req_to_socket(sock, req);
     http_request_destroy(req);
-    string res = read_from_socket(sock);
-    // cout << res;
+    http_parse_from_socket(sock);
 }
 
 // Fetch general informations about the AirPlay server.
@@ -489,8 +487,7 @@ void post_event_slideshow(const int &sock)
     send_req_to_socket(sock, req);
     http_request_destroy(req);
 
-    string res = read_from_socket(sock);
-    cout << res;
+    http_parse_from_socket(sock);
 }
 
 //send the playback state to the client.
@@ -522,8 +519,7 @@ void post_event_video(const int &sock)
     http_request_finish(req, msg, strlen(msg));
     send_req_to_socket(sock, req);
     http_request_destroy(req);
-    string res = read_from_socket(sock);
-    cout << res;
+    http_parse_from_socket(sock);
 }
 
 void post_reverse(const int &sock, const Request &rq)
@@ -733,6 +729,5 @@ void send_command_to_remote_control(const string &command)
         http_request_destroy(req);
     }
 
-    string res = read_from_socket(sock_remote);
-    cout << res;
+    http_parse_from_socket(sock_remote);
 }

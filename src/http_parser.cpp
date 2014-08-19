@@ -28,6 +28,9 @@
 #include <stdlib.h>
 #include <string.h>
 #include <limits.h>
+#include <iostream>
+
+using std::cout;
 
 #ifndef ULLONG_MAX
 # define ULLONG_MAX ((uint64_t) -1) /* 2^64-1 */
@@ -587,6 +590,7 @@ size_t http_parser_execute (http_parser *parser,
   const char *body_mark = 0;
   const char *status_mark = 0;
 
+
   /* We're in an error state. Don't bother doing anything. */
   if (HTTP_PARSER_ERRNO(parser) != HPE_OK) {
     return 0;
@@ -612,7 +616,6 @@ size_t http_parser_execute (http_parser *parser,
         return 1;
     }
   }
-
 
   if (parser->state == s_header_field)
     header_field_mark = data;
@@ -660,8 +663,8 @@ size_t http_parser_execute (http_parser *parser,
     }
 
     reexecute_byte:
+    // cout << parser->state << "\n";
     switch (parser->state) {
-
       case s_dead:
         /* this state is used after a 'Connection: close' message
          * the parser will error out if it reads another message
@@ -674,6 +677,7 @@ size_t http_parser_execute (http_parser *parser,
 
       case s_start_req_or_res:
       {
+        // cout << "s_start_req_or_res\n";
         if (ch == CR || ch == LF)
           break;
         parser->flags = 0;
@@ -693,6 +697,7 @@ size_t http_parser_execute (http_parser *parser,
       }
 
       case s_res_or_resp_H:
+      // cout << "s_res_or_resp_H\n";
         if (ch == 'T') {
           parser->type = HTTP_RESPONSE;
           parser->state = s_res_HT;
@@ -738,21 +743,25 @@ size_t http_parser_execute (http_parser *parser,
         break;
 
       case s_res_HT:
+      // cout << "s_res_HT\n";
         STRICT_CHECK(ch != 'T');
         parser->state = s_res_HTT;
         break;
 
       case s_res_HTT:
+      // cout << "s_res_HTT\n";
         STRICT_CHECK(ch != 'P');
         parser->state = s_res_HTTP;
         break;
 
       case s_res_HTTP:
+        // cout << "s_res_HTTP\n";
         STRICT_CHECK(ch != '/');
         parser->state = s_res_first_http_major;
         break;
 
       case s_res_first_http_major:
+      // cout << "s_res_first_http_major\n";
         if (ch < '0' || ch > '9') {
           SET_ERRNO(HPE_INVALID_VERSION);
           goto error;
@@ -764,6 +773,7 @@ size_t http_parser_execute (http_parser *parser,
 
       /* major HTTP version or dot */
       case s_res_http_major:
+      // cout << "s_res_http_major\n";
       {
         if (ch == '.') {
           parser->state = s_res_first_http_minor;
@@ -788,6 +798,7 @@ size_t http_parser_execute (http_parser *parser,
 
       /* first digit of minor HTTP version */
       case s_res_first_http_minor:
+      // cout << "s_res_first_http_minor\n";
         if (!IS_NUM(ch)) {
           SET_ERRNO(HPE_INVALID_VERSION);
           goto error;
@@ -799,6 +810,7 @@ size_t http_parser_execute (http_parser *parser,
 
       /* minor HTTP version or end of request line */
       case s_res_http_minor:
+      // cout << "s_res_http_minor\n";
       {
         if (ch == ' ') {
           parser->state = s_res_first_status_code;
@@ -822,6 +834,7 @@ size_t http_parser_execute (http_parser *parser,
       }
 
       case s_res_first_status_code:
+      // cout << "s_res_first_status_code\n";
       {
         if (!IS_NUM(ch)) {
           if (ch == ' ') {
@@ -837,6 +850,7 @@ size_t http_parser_execute (http_parser *parser,
       }
 
       case s_res_status_code:
+      // cout << "s_res_status_code\n";
       {
         if (!IS_NUM(ch)) {
           switch (ch) {
@@ -868,6 +882,7 @@ size_t http_parser_execute (http_parser *parser,
       }
 
       case s_res_status_start:
+      // cout << "s_res_status_start\n";
       {
         if (ch == CR) {
           parser->state = s_res_line_almost_done;
