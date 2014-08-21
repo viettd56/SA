@@ -257,7 +257,7 @@ void post_rate(const int &sock, const char *argument)
     http_response_t *res    =   http_response_init("HTTP/1.1", 200, "OK");
     params_map.clear();
     attrs_quotes_map_str_parse(params_map, argument);
-    print_debug("Change playback rate: ", params_map["value"].c_str());
+    print_debug("Change playback rate: %s\n", params_map["value"].c_str());
     http_response_finish(res, NULL, 0);
     send_res_to_socket(sock, res);
     http_response_destroy(res);
@@ -268,7 +268,7 @@ void post_stop(const int &sock)
 {
     http_response_t *res    =   http_response_init("HTTP/1.1", 200, "OK");
     //Stop a photo or slideshow session.
-    print_debug("Stop playback");
+    print_debug("Stop playback\n");
     http_response_finish(res, NULL, 0);
     send_res_to_socket(sock, res);
     http_response_destroy(res);
