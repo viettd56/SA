@@ -2,6 +2,7 @@
 #define _util_hpp_
 #include <string>
 #include <map>
+#include <cstdarg>
 #include "http_request.h"
 #include "http_response.h"
 
@@ -28,5 +29,6 @@ void 	write_to_file(FILE *fr,const char *buffer, const int &length);
 string 	exec(const char* cmd);
 void 	log(string msg);
 void 	nprintln(const char *chr, const int length);
-
+void	print_debug(const char *format, ...);
+int 	parse_options(int argc, char *argv[]);
 #endif

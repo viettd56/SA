@@ -11,6 +11,11 @@
 
 int main(int argc, char *argv[])
 {
+    if(parse_options(argc, argv))
+    {
+        return 0;
+    }
+
     system("avahi-publish -s 'Apple TV' _airplay._tcp 7000  deviceid=70:1a:04:4c:eb:a2 features=0x39f7 model=AppleTV2,1 srcvers=130.14 &");
 
     log("------------server_airplay-------------");

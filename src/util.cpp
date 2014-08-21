@@ -7,6 +7,7 @@
 #include <iostream>
 #include <sstream>
 #include "http_request_parse.hpp"
+#include "global.hpp"
 
 using std::cout;
 
@@ -209,8 +210,11 @@ void send_res_to_socket(const int &sock, http_response_t *res)
 {
     int datalen;
     const char *data_res = http_response_get_data(res, &datalen);
-    cout << "data_res: ";
-    nprintln(data_res, datalen);
+    if (debug_mode)
+    {
+        cout << "data_res: ";
+        nprintln(data_res, datalen);
+    }
     send_to_socket(sock, data_res, datalen);
 }
 
@@ -218,8 +222,11 @@ void send_req_to_socket(const int &sock, http_request_t *req)
 {
     int datalen;
     const char *data_req = http_request_get_data(req, &datalen);
-    cout << "data_req: ";
-    nprintln(data_req, datalen);
+    if (debug_mode)
+    {
+        cout << "data_req: ";
+        nprintln(data_req, datalen);
+    }
     send_to_socket(sock, data_req, datalen);
 }
 
@@ -306,9 +313,23 @@ void http_parse_from_socket(const int &sock)
 
 void log(string msg)
 {
-    msg += "\n";
-    FILE *fr = fopen("log.txt", "ab");
-    write_to_file(fr, msg.c_str(), msg.length());
+    if (debug_mode)
+    {
+        msg += "\n";
+        FILE *fr = fopen("log.txt", "ab");
+        write_to_file(fr, msg.c_str(), msg.length());
+    }
+}
+
+void print_debug(const char *format, ...)
+{
+    if (debug_mode)
+    {
+        va_list args;
+        va_start (args, format);
+        vprintf (format, args);
+        va_end (args);
+    }
 }
 
 void nprintln(const char *chr, const int length)
@@ -316,4 +337,31 @@ void nprintln(const char *chr, const int length)
     char temp[length + 1];
     memcpy(&temp, chr, length);
     cout << temp << "\n";
+}
+
+int parse_options(int argc, char *argv[])
+{
+    char *path = argv[0];
+    char *arg;
+
+    while ((arg = *++argv))
+    {
+        if (!strcmp(arg, "-d"))
+        {
+            debug_mode = true;
+        }
+        else if (!strcmp(arg, "--debug"))
+        {
+            debug_mode = true;
+        }
+        else if (!strcmp(arg, "-h") || !strcmp(arg, "--help"))
+        {
+            fprintf(stderr, "Usage: %s [OPTION...]\n", path);
+            fprintf(stderr, "\n");
+            fprintf(stderr, "  -d, --debug            Sets debug mode\n");
+            return 1;
+        }
+    }
+
+    return 0;
 }

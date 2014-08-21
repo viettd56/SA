@@ -57,7 +57,7 @@ int net_search_socket_remote_control()
     remote_searched = exec(cmd.c_str());
     attrs_brackets_map_str_parse(map, remote_searched.c_str());
 
-    std::cout << map["address"] << "\n" << map["port"] << "\n";
+    print_debug("addr: %s\nport: %s\n", map["address"].c_str(), map["port"].c_str());
     if ((map["address"] != "") && (map["port"] != ""))
     {
         int     sockfd, portno;
@@ -67,11 +67,11 @@ int net_search_socket_remote_control()
         portno = atoi(map["port"].c_str());
         sockfd = socket(AF_INET, SOCK_STREAM, 0);
         if (sockfd < 0)
-            std::cout << "ERROR opening socket remote control\n";
+            print_debug("ERROR opening socket remote control\n");
         server = gethostbyname(map["address"].c_str());
         if (server == NULL)
         {
-            std::cout << "ERROR, no such host remote control\n";
+            print_debug("ERROR, no such host remote control\n");
         }
         bzero((char *) &serv_addr, sizeof(serv_addr));
         serv_addr.sin_family = AF_INET;
@@ -80,8 +80,7 @@ int net_search_socket_remote_control()
               server->h_length);
         serv_addr.sin_port = htons(portno);
         if (connect(sockfd, (struct sockaddr *) &serv_addr, sizeof(serv_addr)) < 0)
-            std::cout << "ERROR connecting remote control\n";
-
+            print_debug("ERROR connecting remote control\n");
         return sockfd;
     }
     else

@@ -66,24 +66,24 @@ void put_photo(const int &sock, const Request &rq)
     if (x_apple_transition == "Dissolve")
     {
         //if picture using the dissolve transition
-        cout << "Picture using the dissolve transition" << "\n";
+        print_debug("Picture using the dissolve transition\n");
     }
     else
     {
         //if show a picture without any transition
-        cout << "Show a picture without any transition" << "\n";
-        cout << rq.get_data() << "\n";
+        print_debug("Show a picture without any transition\n");
+        // print_debug("%s\n", rq.get_data());
     }
 
     if (x_apple_assetAction == "cacheOnly")
     {
         //cache a picture for future display
-        cout << "cache a picture for future display" << "\n";
+        print_debug("Cache a picture for future display\n");
     }
     else if (x_apple_assetAction == "displayCached")
     {
         //show a cached picture
-        cout << "show a cached picture" << "\n";
+        print_debug("Show a cached picture\n");
     }
 
     http_response_finish(res, NULL, 0);
@@ -102,21 +102,20 @@ void put_slideshow_session(const int &sock, const Request &rq)
     string  theme           =   boost::any_cast<const string &>(dictSettings.find("theme")->second);
     string  state           =   boost::any_cast<const string &>(dict.find("state")->second);
 
-    cout << "slideDuration = " << slideDuration << "\n";
-    cout << "theme = " << theme << "\n";
-    cout << "state = " << state << "\n";
+    print_debug("slideDuration = %d\n", slideDuration);
+    print_debug("Theme = %s\n", theme.c_str());
+    print_debug("State = %s\n", state.c_str());
 
     http_response_t *res    =   http_response_init("HTTP/1.1", 200, "OK");
     http_response_add_header(res, "Content-Type", "text/x-apple-plist+xml");
-    // cout << params_map["theme"] << "\n";
-    string  msg_reponse      =  "";
-    msg_reponse              =  msg_reponse + "<?xml version=\"1.0\" encoding=\"UTF-8\"?>" + "\n"
-                                + "<!DOCTYPE plist PUBLIC \"-//Apple//DTD PLIST 1.0//EN\"" + "\n"
-                                + "\"http://www.apple.com/DTDs/PropertyList-1.0.dtd\">" + "\n"
-                                + "<plist version=\"1.0\">" + "\n"
-                                + "<dict/>" + "\n"
-                                + "</plist>" + "\n";
-    const char *msg          =   msg_reponse.c_str();
+    string  msg_reponse     =  "";
+    msg_reponse             =  msg_reponse + "<?xml version=\"1.0\" encoding=\"UTF-8\"?>" + "\n"
+                               + "<!DOCTYPE plist PUBLIC \"-//Apple//DTD PLIST 1.0//EN\"" + "\n"
+                               + "\"http://www.apple.com/DTDs/PropertyList-1.0.dtd\">" + "\n"
+                               + "<plist version=\"1.0\">" + "\n"
+                               + "<dict/>" + "\n"
+                               + "</plist>" + "\n";
+    const char *msg         =   msg_reponse.c_str();
     http_response_finish(res, msg, strlen(msg));
     send_res_to_socket(sock, res);
     http_response_destroy(res);
@@ -152,7 +151,7 @@ void post_event_photo(const int &sock)
     send_req_to_socket(sock, req);
     http_request_destroy(req);
 
-   http_parse_from_socket(sock);
+    http_parse_from_socket(sock);
 }
 
 // fetch a new picture
@@ -185,7 +184,6 @@ void get_server_info(const int &sock)
 
     http_response_t *res    =   http_response_init("HTTP/1.1", 200, "OK");
     http_response_add_header(res, "Content-Type", "text/x-apple-plist+xml");
-    // cout << params_map["theme"] << "\n";
     string msg_reponse  =   "";
     msg_reponse         =   msg_reponse + "<?xml version=\"1.0\" encoding=\"UTF-8\"?>" + "\n"
                             + "<!DOCTYPE plist PUBLIC \"-//Apple//DTD PLIST 1.0//EN\"" + "\n"
@@ -212,7 +210,7 @@ void get_server_info(const int &sock)
 void post_play(const int &sock, const Request &rq)
 {
     http_response_t *res    =   http_response_init("HTTP/1.1", 200, "OK");
-    cout << "Content-Type: " << rq.get_headers_map()["Content-Type"] << "\n";
+    print_debug("Content-Type: %s\n", rq.get_headers_map()["Content-Type"].c_str());
 
     if (rq.get_headers_map()["Content-Type"] == "application/x-apple-binary-plist")
     {
@@ -223,17 +221,17 @@ void post_play(const int &sock, const Request &rq)
         string content_location   =   boost::any_cast<const string &>(dict.find("Content-Location")->second);
         double start_position     =   boost::any_cast<const double &>(dict.find("Start-Position")->second);
 
-        cout << "Content-Location: " << content_location << "\n";
-        cout << "Start-Position: " << start_position << "\n";
+        print_debug("Content-Location = %s\n", content_location.c_str());
+        print_debug("Start-Position = %f\n", start_position);
     }
     else
     {
-        //cout << "text/parameters" << "\n";
-        //cout << "data:" << rq.get_data() << "\n";
+        print_debug("data: %s\n", rq.get_data());
         params_map.clear();
         msgs_map_str_parse(params_map, rq.get_data());
-        cout << "Content-Location: " << params_map["Content-Location"] << "\n";
-        cout << "Start-Position: " << params_map["Start-Position"] << "\n";
+
+        print_debug("Content-Location = %s\n", params_map["Content-Location"].c_str());
+        print_debug("Start-Position = %f\n", params_map["Start-Position"].c_str());
     }
 
     http_response_finish(res, NULL, 0);
@@ -246,9 +244,8 @@ void post_scrub(const int &sock, const char *argument)
 {
     http_response_t *res    =   http_response_init("HTTP/1.1", 200, "OK");
     params_map.clear();
-    //cout << data << "\n";
     attrs_quotes_map_str_parse(params_map, argument);
-    cout << params_map["position"] << "\n";
+    print_debug("Seek to position: %s\n", params_map["position"].c_str());
     http_response_finish(res, NULL, 0);
     send_res_to_socket(sock, res);
     http_response_destroy(res);
@@ -259,9 +256,8 @@ void post_rate(const int &sock, const char *argument)
 {
     http_response_t *res    =   http_response_init("HTTP/1.1", 200, "OK");
     params_map.clear();
-    //cout << data << "\n";
     attrs_quotes_map_str_parse(params_map, argument);
-    cout << params_map["value"] << "\n";
+    print_debug("Change playback rate: ", params_map["value"].c_str());
     http_response_finish(res, NULL, 0);
     send_res_to_socket(sock, res);
     http_response_destroy(res);
@@ -272,6 +268,7 @@ void post_stop(const int &sock)
 {
     http_response_t *res    =   http_response_init("HTTP/1.1", 200, "OK");
     //Stop a photo or slideshow session.
+    print_debug("Stop playback");
     http_response_finish(res, NULL, 0);
     send_res_to_socket(sock, res);
     http_response_destroy(res);
@@ -283,13 +280,13 @@ void get_scrub(const int &sock)
     http_response_t *res    =   http_response_init("HTTP/1.1", 200, "OK");
     http_response_add_header(res, "Content-Type", "text/parameters");
     //add duration here
-    string duration     =   doubletostr(15);
-    string position     =   doubletostr(1);
+    string duration         =   doubletostr(15);
+    string position         =   doubletostr(1);
 
-    string msg_reponse  =   "";
+    string msg_reponse      =   "";
     msg_reponse = msg_reponse + "duration: " + duration + "\nposition: " + position;
-    cout << msg_reponse << "\n";
-    const char *msg     =   msg_reponse.c_str();
+    print_debug("msg_reponse: %s\n", msg_reponse.c_str());
+    const char *msg         =   msg_reponse.c_str();
     http_response_finish(res, msg, strlen(msg));
     send_res_to_socket(sock, res);
     http_response_destroy(res);
@@ -299,7 +296,7 @@ void get_scrub(const int &sock)
 //Retrieve playback informations such as position, duration, rate, buffering status and more.
 void get_playback_info(const int &sock)
 {
-    http_response_t *res    =   http_response_init("HTTP/1.1", 200, "OK");
+    http_response_t *res                =   http_response_init("HTTP/1.1", 200, "OK");
     //get playback access log
     string duration                     =   "1801";
     string loadedTimeRanges_duration    =   "51.541130402";
@@ -366,10 +363,10 @@ void put_setProperty(const int &sock, const char *argument, const Request &rq)
     int timescale   =   boost::any_cast<const int64_t &>(dictValue.find("timescale")->second);
     int value       =   boost::any_cast<const int64_t &>(dictValue.find("value")->second);
 
-    cout << "epoch = " << epoch << "\n";
-    cout << "flags = " << flags << "\n";
-    cout << "timescale = " << timescale << "\n";
-    cout << "value = " << value << "\n";
+    print_debug("epoch = %d\n", epoch);
+    print_debug("flags = %d\n", flags);
+    print_debug("timescale = %d\n", timescale);
+    print_debug("value = %d\n", value);
 
     int errorCode = 0;
 
@@ -585,24 +582,21 @@ void post_stream(const int &sock, const Request &rq)
     //diffirent protocol
 
     //deviceID
-    cout << "deviceID: " << "\n";
     deviceID = boost::any_cast<const string &>(dict.find("deviceID")->second);
-    cout << deviceID << "\n";
+    print_debug("deviceID: %s\n", deviceID.c_str());
 
     //FpsInfo
-    cout << "FpsInfo: " << "\n";
+    print_debug("FpsInfo: ");
     const vector<boost::any> &arrayFpsInfo = boost::any_cast<const vector<boost::any>&>(dict.find("fpsInfo")->second);
     for (unsigned int i = 0; i < arrayFpsInfo.size(); i++)
     {
         fpsInfo.push_back(boost::any_cast<const string &>(arrayFpsInfo[i]));
-        cout << fpsInfo[i];
+        print_debug("%s\n", fpsInfo[i].c_str());
     }
-    cout << "\n";
 
     //latencyMs
-    cout << "latencyMs: " << "\n";
     latencyMs = boost::any_cast<const string &>(dict.find("latencyMs")->second);
-    cout << latencyMs << "\n";
+    print_debug("latencyMs: %s\n", latencyMs.c_str());
 
     // //param1
     // param1 = boost::any_cast<const vector<char> &>(dict.find("param1")->second);
@@ -611,24 +605,21 @@ void post_stream(const int &sock, const Request &rq)
     // param2 = boost::any_cast<const vector<char> &>(dict.find("param2")->second);
 
     //sessionID
-    cout << "sessionID: " << "\n";
     sessionID = boost::any_cast<const string &>(dict.find("sessionId")->second);
-    cout << sessionID << "\n";
+    print_debug("sessionID: %s\n", sessionID.c_str());
 
     //timestampInfo
-    cout << "timestampInfo: " << "\n";
+    print_debug("timestampInfo: ");
     const vector<boost::any> &arrayTimestampInfo = boost::any_cast<const vector<boost::any>&>(dict.find("timestampInfo")->second);
     for (unsigned int i = 0; i < arrayTimestampInfo.size(); i++)
     {
         timestampInfo.push_back(boost::any_cast<const string &>(arrayTimestampInfo[i]));
-        cout << timestampInfo[i];
+        print_debug("%s\n", timestampInfo[i].c_str());
     }
-    cout << "\n";
 
     //version
-    cout << "version: " << "\n";
     version = boost::any_cast<const string &>(dict.find("version")->second);
-    cout << version << "\n";
+    print_debug("version: %s\n", version.c_str());
 
     //read headers stream packets
     int             n                       = 0;
@@ -649,9 +640,9 @@ void post_stream(const int &sock, const Request &rq)
             n = read(sock, buffer_header + n, BUFFER_HEADER_SIZE - length_loaded);
             length_loaded += n;
             if (n < 0) error("ERROR reading header from socket");
-            if (n == 0) return;
+            if (n == 0) exit(0);
 
-            cout << "n: " << n << "\n" << "buffer_payload_size: " << buffer_payload_size << "\n";
+            print_debug("n: %d\nbuffer_payload_size: %u\n", n, buffer_payload_size);
         }
 
         header_stream_packets header;
@@ -660,8 +651,8 @@ void post_stream(const int &sock, const Request &rq)
         unsigned short  payload_type = header.payload_type;
         unsigned int    payload_size = header.payload_size;
 
-        cout << "payload_size: " << payload_size << "\n";
-        cout << "payload_type: " << payload_type << "\n";
+        print_debug("payload_size: %u\n", payload_size);
+        print_debug("payload_type: %u\n", payload_type);
 
         if (payload_size > buffer_payload_size)
         {
@@ -678,25 +669,25 @@ void post_stream(const int &sock, const Request &rq)
             n = read(sock, buffer_payload, payload_size - length_loaded);
             length_loaded += n;
             if (n < 0) error("ERROR reading payload from socket");
-            if (n == 0) return;
+            if (n == 0) exit(0);
 
-            cout << "payload_size: " << payload_size << "\n";
-            cout << "loaded: " << length_loaded << "\n";
+            print_debug("payload_size: %u\n", payload_size);
+            print_debug("loaded: %u\n", length_loaded);
 
             switch (payload_type)
             {
             case 0:
-                cout << "video bitstream" << "\n";
+                print_debug("video bitstream\n");
                 //video bitstream
                 break;
             case 1:
-                cout << "codec data" << "\n";
+                print_debug("codec data\n");
                 //codec data
                 codec_data codec;
                 memcpy((char *)&codec, buffer_payload, sizeof(codec));
                 break;
             case 2:
-                cout << "heartbeat" << "\n";
+                print_debug("heartbeat\n");
                 //heartbeat
                 break;
             default:

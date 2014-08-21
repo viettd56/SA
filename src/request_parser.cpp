@@ -6,8 +6,6 @@
 #include <cstring>
 #include <cstdlib>
 
-using std::cout;
-
 string          last_header_field       =   "";
 string          last_header_value       =   "";
 string          url                     =   "";
@@ -66,7 +64,7 @@ int header_value_cb(http_parser *p, const char *buf, size_t len)
         headers_map_parsed.erase(last_header_field);
     }
     headers_map_parsed.insert (std::pair<string, string>(last_header_field, last_header_value));
-    //cout << "F:" << last_header_field << "\n" << "V:" << last_header_value << "\n";
+    // print_debug("F: %s\nV: %s\n", last_header_field, last_header_value);
     last_state = VALUE;
     return 0;
 }
@@ -83,36 +81,34 @@ int body_cb(http_parser *p, const char *buf, size_t len)
     }
     // }
     // safe_copy(data, buf, len, data_size, data_len);
-    // cout << "size:" << data_size << "\n" << "len:" << data_len << "\n" << len << "\n";
-    // cout << "size2:" << data_size2 << "\n" << "len2:" << data_len2 << "\n" << len << "\n";
+    // print_debug("size: %d\nlen: %d\n", data_size, data_len);
 
-    cout << "data:" << data << "\n";
+    print_debug("data: %s\n", data);
     return 0;
 }
 
 int headers_complete_cb(http_parser *p)
 {
-    // cout << "on_headers_complete" << "\n";
+    print_debug("on_headers_complete\n");
     data_size   =   atoi(headers_map_parsed["Content-Length"].c_str());
-    //cout << "--------------------" << data_size << "------------------------\n";
+    // print_debug("data_size: %d\n", data_size);
     data        =   new char[data_size]();
-    //cout << "-------------------" << (int *)data << "\n";
     return 0;
 }
 
 
 int message_complete_cb(http_parser *p)
 {
-    cout << "message_complete_cb" << "\n";
+    print_debug("message_complete_cb\n");
 
     Request rq;
     rq.set_headers_map(headers_map_parsed);
     rq.set_params_map(params_map_parsed);
     rq.set_url(url);
     rq.set_method(convert_method(p->method));
-    // cout << "-----method:" << rq.get_method() << "\n";
+    // print_debug("method: %s\n", rq.get_method().c_str());
     rq.set_data(data, data_len);
-    //cout << "URL: " << url << "\nBody: " <<  data << "\n";
+    // print_debug("url: %s\nbody: %s\n", url.c_str(), data);
     rq.set_len_data(data_len);
     if (data != NULL)
     {
@@ -159,7 +155,7 @@ void request_parser_excute(http_parser *parser, char *buf, int n)
     // cout << "HTTP: ";
     // nprintln(buf, n);
     int nparsed = http_parser_execute(parser, &settings, buf, n);
-    cout << "nparsed: " << nparsed << "\nn:" << n << "\n";
+    print_debug("nparsed: %d\nn: %d\n", nparsed, n);
     if (nparsed != n)
     {
         error("http parser error");

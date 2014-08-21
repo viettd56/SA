@@ -12,6 +12,11 @@
 
 int main(int argc, char *argv[])
 {
+    if (parse_options(argc, argv))
+    {
+        return 0;
+    }
+
     int         sockfd, newsockfd;
     socklen_t   clilen;
     struct      sockaddr_in cli_addr;
