@@ -25,28 +25,28 @@ void get_slideshow_features(const int &sock)
 {
     http_response_t *res    =   http_response_init("HTTP/1.1", 200, "OK");
     http_response_add_header(res, "Content-Type", "text/x-apple-plist+xml");
-    string  key          =   "Reflections";
-    string  name         =   "Reflections";
+    string  key             =   "Reflections";
+    string  name            =   "Reflections";
 
-    string  msg_reponse  =   "";
-    msg_reponse          =   msg_reponse + "<?xml version=\"1.0\" encoding=\"UTF-8\"?>" + "\n"
-                             + "<!DOCTYPE plist PUBLIC \"-//Apple//DTD PLIST 1.0//EN\"" + "\n"
-                             + "\"http://www.apple.com/DTDs/PropertyList-1.0.dtd\">" + "\n"
-                             + "<plist version=\"1.0\">" + "\n"
-                             + "<dict>" + "\n"
-                             + "<key>themes</key>" + "\n"
-                             + "<array>" + "\n"
-                             + "<dict>" + "\n"
-                             + "<key>key</key>" + "\n"
-                             + "<string>" + key + "</string>" + "\n"
-                             + "<key>name</key>" + "\n"
-                             + "<string>" + name + "</string>" + "\n"
-                             + "</dict>" + "\n"
-                             + "</array>" + "\n"
-                             + "</dict>" + "\n"
-                             + "</plist>" + "\n";
+    string  msg_reponse     =   "";
+    msg_reponse             =   msg_reponse + "<?xml version=\"1.0\" encoding=\"UTF-8\"?>" + "\n"
+                                + "<!DOCTYPE plist PUBLIC \"-//Apple//DTD PLIST 1.0//EN\"" + "\n"
+                                + "\"http://www.apple.com/DTDs/PropertyList-1.0.dtd\">" + "\n"
+                                + "<plist version=\"1.0\">" + "\n"
+                                + "<dict>" + "\n"
+                                + "<key>themes</key>" + "\n"
+                                + "<array>" + "\n"
+                                + "<dict>" + "\n"
+                                + "<key>key</key>" + "\n"
+                                + "<string>" + key + "</string>" + "\n"
+                                + "<key>name</key>" + "\n"
+                                + "<string>" + name + "</string>" + "\n"
+                                + "</dict>" + "\n"
+                                + "</array>" + "\n"
+                                + "</dict>" + "\n"
+                                + "</plist>" + "\n";
 
-    const char *msg     =   msg_reponse.c_str();
+    const char *msg         =   msg_reponse.c_str();
     http_response_finish(res, msg, strlen(msg));
     send_res_to_socket(sock, res);
     http_response_destroy(res);

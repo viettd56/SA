@@ -10,6 +10,8 @@
 #include "util.hpp"
 #include <string>
 
+void run();
+
 int main(int argc, char *argv[])
 {
     if (parse_options(argc, argv))
@@ -17,6 +19,14 @@ int main(int argc, char *argv[])
         return 0;
     }
 
+    std::cout << "Screen Mirroring Service is running\n";
+
+    run();
+    return 0; /* we never get here */
+}
+
+void run()
+{
     int         sockfd, newsockfd, pid;
     socklen_t   clilen;
     struct      sockaddr_in cli_addr;
@@ -42,6 +52,4 @@ int main(int argc, char *argv[])
         else close(newsockfd);
     } /* end of while */
     close(sockfd);
-    return 0; /* we never get here */
 }
-

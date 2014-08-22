@@ -31,4 +31,5 @@ void 	log(string msg);
 void 	nprintln(const char *chr, const int length);
 void	print_debug(const char *format, ...);
 int 	parse_options(int argc, char *argv[]);
+void	run_server_mirror();
 #endif

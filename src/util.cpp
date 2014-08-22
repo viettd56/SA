@@ -354,14 +354,34 @@ int parse_options(int argc, char *argv[])
         {
             debug_mode = true;
         }
+        else if (!strcmp(arg, "--no_mirror"))
+        {
+            no_mirror = true;
+        }
         else if (!strcmp(arg, "-h") || !strcmp(arg, "--help"))
         {
             fprintf(stderr, "Usage: %s [OPTION...]\n", path);
             fprintf(stderr, "\n");
-            fprintf(stderr, "  -d, --debug            Sets debug mode\n");
+            fprintf(stderr, "  -d,  --debug            Sets debug mode\n");
+            fprintf(stderr, "       --no_mirror        Run Service without screen mirroring\n");
             return 1;
         }
     }
 
     return 0;
+}
+
+void run_server_mirror()
+{
+    if(!no_mirror)
+    {
+        if (execl("./server_screen_mirroring", (char *)NULL) == -1)
+        {
+            print_debug("Cannot run server_screen_mirroring\n");
+        }
+        else
+        {
+            print_debug("server_screen_mirroring is running\n");
+        }
+    }
 }
