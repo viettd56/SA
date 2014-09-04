@@ -24,4 +24,4 @@ $(EXECUTABLE_SERVER_SCREEN_MIRROR): $(OBJECTS_SERVER_SCREEN_MIRROR)
 	$(CC) $(CFLAGS) $< $(INCLUDES) -o $@
 
 clean:
-	rm -rf *o server server_screen_mirroring
+	rm -rf *.o server server_screen_mirroring

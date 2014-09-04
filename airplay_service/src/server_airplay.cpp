@@ -8,19 +8,27 @@
 #include <netinet/in.h>
 #include "net.hpp"
 #include "util.hpp"
+#include <string>
 
 void run();
 
 int main(int argc, char *argv[])
 {
-    int pid;
-
     if (parse_options(argc, argv))
     {
         return 0;
     }
 
-    system("avahi-publish -s 'Apple TV' _airplay._tcp 7000  deviceid=70:1a:04:4c:eb:a2 features=0x39f7 model=AppleTV2,1 srcvers=130.14 &");
+    int pid;
+
+    string macaddr_eth0     =   mac_eth0();
+    string macaddr_wlan0    =   mac_wlan0();
+
+    string cmd_avahi        =   "avahi-publish -s 'Apple TV' _airplay._tcp 7000 deviceid=";
+    cmd_avahi               +=  macaddr_eth0;
+    cmd_avahi               +=  " features=0x0dec model=AppleTV2,1 srcvers=130.14 &";
+
+    system(cmd_avahi.c_str());
 
     std::cout << "Airplay Service is running\n";
 

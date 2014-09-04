@@ -385,3 +385,23 @@ void run_server_mirror()
         }
     }
 }
+
+string mac_eth0()
+{
+    char mac[18];
+    string temp = exec("/sbin/ifconfig | grep HWaddr | grep eth0");
+    memcpy(mac, strstr(temp.c_str(), "HWaddr") + sizeof("HWaddr"), 17);
+    mac[17] = '\0';
+    string str_mac(mac);
+    return str_mac; 
+}
+
+string mac_wlan0()
+{
+   char mac[18];
+    string temp = exec("/sbin/ifconfig | grep HWaddr | grep wlan0");
+    memcpy(mac, strstr(temp.c_str(), "HWaddr") + sizeof("HWaddr"), 17);
+    mac[17] = '\0';
+    string str_mac(mac);
+    return str_mac; 
+}
