@@ -154,7 +154,7 @@ void init(char *name, char *pass, int port)
 
 int main()
 {
-    init("AirPort", NULL, 5555);
+    init("AirPort", "123456", 5555);
     app_shutdown(1);
     return 1;
 }

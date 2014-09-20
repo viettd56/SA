@@ -25,7 +25,7 @@ int main(int argc, char *argv[])
     string macaddr_wlan0    =   mac_wlan0();
 
     string cmd_avahi        =   "avahi-publish -s 'Apple TV' _airplay._tcp 7000 deviceid=";
-    cmd_avahi               +=  macaddr_wlan0;
+    cmd_avahi               +=  macaddr_eth0;
     cmd_avahi               +=  " features=0x0dec model=AppleTV2,1 srcvers=130.14 &";
 
     system(cmd_avahi.c_str());

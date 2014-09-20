@@ -270,7 +270,7 @@ static rtsp_message * rtsp_read_request(int fd) {
                 memmove(buf, next, inbuf);
         }
     }
-        
+
     if (msg_size > buflen) {
         buf = realloc(buf, msg_size);
         if (!buf) {

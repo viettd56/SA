@@ -13,7 +13,7 @@
 
 app_config config;
 
-int debuglev = 1000;
+int debuglev = 0;
 
 void die(char *format, ...) {
     fprintf(stderr, "FATAL: ");
