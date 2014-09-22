@@ -24,11 +24,23 @@ int main(int argc, char *argv[])
     string macaddr_eth0     =   mac_eth0();
     string macaddr_wlan0    =   mac_wlan0();
 
-    string cmd_avahi        =   "avahi-publish -s 'Apple TV' _airplay._tcp 7000 deviceid=";
-    cmd_avahi               +=  macaddr_eth0;
-    cmd_avahi               +=  " features=0x0dec model=AppleTV2,1 srcvers=130.14 &";
+    if (macaddr_eth0 != "")
+    {
+        string cmd_avahi        =   "avahi-publish -s 'Apple TV LAN' _airplay._tcp 7000 deviceid=";
+        cmd_avahi               +=  macaddr_eth0;
+        cmd_avahi               +=  " features=0xdec model=AppleTV2,1 srcvers=130.14 &";
 
-    system(cmd_avahi.c_str());
+        system(cmd_avahi.c_str());
+    }
+
+    if (macaddr_wlan0 != "")
+    {
+        string cmd_avahi        =   "avahi-publish -s 'Apple TV WIFI' _airplay._tcp 7000 deviceid=";
+        cmd_avahi               +=  macaddr_wlan0;
+        cmd_avahi               +=  " features=0xdec model=AppleTV2,1 srcvers=130.14 &";
+
+        system(cmd_avahi.c_str());
+    }
 
     std::cout << "Airplay Service is running\n";
 

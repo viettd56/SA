@@ -375,7 +375,7 @@ void run_server_mirror()
 {
     if(!no_mirror)
     {
-        if (execl("./server_screen_mirroring", (char *)NULL) == -1)
+        if (execl("./server_screen_mirroring", "", (char *)NULL) == -1)
         {
             print_debug("Cannot run server_screen_mirroring\n");
         }
@@ -390,6 +390,7 @@ string mac_eth0()
 {
     char mac[18];
     string temp = exec("/sbin/ifconfig | grep HWaddr | grep eth0");
+    if (temp == "") return "";
     memcpy(mac, strstr(temp.c_str(), "HWaddr") + sizeof("HWaddr"), 17);
     mac[17] = '\0';
     string str_mac(mac);
@@ -400,6 +401,7 @@ string mac_wlan0()
 {
    char mac[18];
     string temp = exec("/sbin/ifconfig | grep HWaddr | grep wlan0");
+    if (temp == "") return "";
     memcpy(mac, strstr(temp.c_str(), "HWaddr") + sizeof("HWaddr"), 17);
     mac[17] = '\0';
     string str_mac(mac);
