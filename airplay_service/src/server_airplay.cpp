@@ -28,7 +28,7 @@ int main(int argc, char *argv[])
     {
         string cmd_avahi        =   "avahi-publish -s 'Apple TV LAN' _airplay._tcp 7000 deviceid=";
         cmd_avahi               +=  macaddr_eth0;
-        cmd_avahi               +=  " features=0x37f5 model=AppleTV2,1 srcvers=130.14 &";
+        cmd_avahi               +=  " features=0x33f5 model=AppleTV2,1 srcvers=130.14 &";
 
         system(cmd_avahi.c_str());
     }
@@ -37,7 +37,7 @@ int main(int argc, char *argv[])
     {
         string cmd_avahi        =   "avahi-publish -s 'Apple TV WIFI' _airplay._tcp 7000 deviceid=";
         cmd_avahi               +=  macaddr_wlan0;
-        cmd_avahi               +=  " features=0x37f5 model=AppleTV2,1 srcvers=130.14 &";
+        cmd_avahi               +=  " features=0x33f5 model=AppleTV2,1 srcvers=130.14 &";
 
         system(cmd_avahi.c_str());
     }
